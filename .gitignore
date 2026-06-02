@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Build output
+build/
+dist/
+
+# Logs
+*.log
+build/errors.log
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if tooling is ever added)
+node_modules/
+npm-debug.log*
+
+# BMAD working output (intermediate planning artifacts)
+_bmad-output/
+
+# Environment / secrets
+.env
+.env.*
+
+# Bmad
+_bmad/
+_bmad-output/
+.claude/
