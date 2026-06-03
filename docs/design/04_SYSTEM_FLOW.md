@@ -54,10 +54,12 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
 
 ```
 1. AI Agent receives topic/keyword or reads RSS feed
-2. AI generates Markdown file (title, body, meta, image URL)
-3. AI writes file → content/posts/[slug].md
+2. AI generates article content (title, body, meta description, image URL)
+3. AI writes:
+   - content/posts/published/YYYY/MM/DD/XX/YY/<locale>.md  ← body only, no frontmatter
+   - content/posts/published/YYYY/MM/DD/XX/YY/meta.json    ← metadata (title, slug, date, category, ...)
 4. AI runs: npm run build:cms
-   → parse frontmatter + Markdown
+   → read meta.json + Markdown body (no frontmatter parsing)
    → generate HTML + .hash files
    → update build/manifest.json (incremental diff)
    → update sitemap.xml + rss.xml

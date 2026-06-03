@@ -10,11 +10,11 @@
 
 | File | Purpose | Status |
 |---|---|---|
-| [SYSTEM_FLOW.md](./SYSTEM_FLOW.md) | Business model, revenue pipeline, why Akao vs WordPress | ✅ Final |
-| [SCOPE.md](./SCOPE.md) | MVP scope, what's in/out, all confirmed decisions | ✅ Final |
+| [04_SYSTEM_FLOW.md](./design/04_SYSTEM_FLOW.md) | Business model, revenue pipeline, why Akao vs WordPress | ✅ Final |
+| [SCOPE.md](./plan/SCOPE.md) | MVP scope, what's in/out, all confirmed decisions | ✅ Final |
 | [PRD.md](./PRD.md) | Product requirements — FRs, NFRs, user journeys, success metrics | ✅ Final |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Technical architecture — ADRs, file structure, patterns, FR→file mapping | ✅ Final |
-| [STORIES.md](./STORIES.md) | 19 stories across 3 epics with acceptance criteria | ✅ Final |
+| [02_ARCHITECTURE.md](./design/02_ARCHITECTURE.md) | Technical architecture — ADRs, file structure, patterns, FR→file mapping | ✅ Final |
+| [STORIES.md](./plan/STORIES.md) | 19 stories across 3 epics with acceptance criteria | ✅ Final |
 
 ---
 

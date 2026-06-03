@@ -68,15 +68,20 @@ if (manifest.entries[meta.slug]) { appendError(...); continue }
 
 ---
 
-### Gap 4 — Analytics vắng mặt hoàn toàn (GOALS #15, #16) — **P2**
-Không có GA4 trong HTML, không có mechanism thu thập AdSense per-page RPM. AI viết 900 bài/ngày không bao giờ biết gì hoạt động.
+### Gap 4 — Analytics (GOALS #15, #16) — **Post-MVP**
 
-**Fix (optional config, ~10 lines render.js):**
+Hai vấn đề khác nhau hoàn toàn:
+
+**#15 GA4 traffic data** — không phức tạp. CMS không cần track hành vi phức tạp như eCommerce (add to cart, checkout, abandoned cart). Chỉ cần biết bài viết được bao nhiêu người xem, xem bao lâu. Giải pháp là cắm đoạn code cơ bản của Google Analytics vào `<head>` — 2 dòng HTML, không phải một feature. Triển khai lúc nào cũng được sau MVP.
+
 ```yaml
 analytics:
   ga4_measurement_id: G-XXXXXXXXXX
 ```
-GA4 snippet inject trong `<head>` nếu ID có. AdSense RPM = manual export, không có in-pipeline solution.
+
+**#16 AdSense per-page RPM** — khác GA4. Cần AdSense Reporting API hoặc manual export từ dashboard. Không có in-pipeline solution. Genuinely deferred.
+
+**Fix cho #15 (~10 lines render.js):** Inject GA4 snippet trong `<head>` nếu `ga4_measurement_id` có trong config. Không cần custom events, không cần programmatic tracking.
 
 ---
 
@@ -87,11 +92,11 @@ SCOPE Q8 intentionally deferred. AI phải manually run `npm run build:cms`. Mis
 
 ---
 
-## Summary: 4 Deltas → coverage từ 8/16 → 12/16 trong 1 ngày
+## Summary: Deltas cần làm
 
-| Delta                | File                      | Effort        |
-| -------------------- | ------------------------- | ------------- |
-| D1: fb_caption field | frontmatter schema + UJ-1 | 1 line config |
-| D2: default_og_image | config.yaml + seo.js      | 2 lines       |
-| D3: quality gate     | pipeline.js               | ~10 lines     |
-| D4: GA4 inject       | render.js + config.yaml   | ~10 lines     |
+| Delta                | File                      | Effort        | Priority |
+| -------------------- | ------------------------- | ------------- | -------- |
+| D1: fb_caption field | frontmatter schema + UJ-1 | 1 line config | P0       |
+| D2: default_og_image | config.yaml + seo.js      | 2 lines       | P0       |
+| D3: quality gate     | pipeline.js               | ~10 lines     | P1       |
+| D4: GA4 inject       | render.js + config.yaml   | ~10 lines     | Post-MVP |

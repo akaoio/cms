@@ -154,7 +154,7 @@ if (r.status !== 200) { console.error("DEPLOY VERIFY FAILED"); process.exit(1) }
 | R11 | No `dateModified` → Google không detect freshness | Medium       | Medium   | `updated_at` + JSON-LD             | Low    |
 | R12 | No deploy verification → silent fail              | Medium       | Medium   | HTTP check sau deploy              | Low    |
 | R13 | CloudFront per-file invalidation → $130+/tháng    | Certain (P2) | Medium   | Batch `/*` invalidation            | Low    |
-| R14 | No analytics → AI không optimize                  | Certain      | Medium   | GA4 snippet trong render.js        | Low    |
+| R14 | No GA4 → không có traffic data per article        | Certain      | Low      | 2 dòng HTML trong `<head>` — post-MVP, không block gì | Trivial |
 | R15 | URL 404 sau archive → FB link rots                | Medium       | Low      | `archived` → redirect stub         | Medium |
 
 **10/15 risks có effort Low. Không risk nào đòi thay đổi kiến trúc cốt lõi.**
@@ -163,8 +163,10 @@ if (r.status !== 200) { console.error("DEPLOY VERIFY FAILED"); process.exit(1) }
 
 ## V. Action Plan
 
-**Ngay hôm nay:** R2 (deploy auto) · R1 (quality gate) · R6 (default OG) · R5 (publish_at) · R14 (GA4)
+**Ngay hôm nay:** R2 (deploy auto) · R1 (quality gate) · R6 (default OG) · R5 (publish_at)
 
 **Trước khi scale:** R4 (pattern routing — phải làm trước khi implement route injection) · R7 (status field) · R11 (updated_at) · R12 (deploy verify) · R8 (git commit doc)
+
+**Post-MVP:** R14 (GA4 snippet — trivial, 2 dòng HTML, không block MVP)
 
 **Trước Phase 2 (>10K articles):** R3 (paginated index) · R9 (manifest backup) · R13 (S3 + batch invalidation) · R15 (archive redirects)

@@ -185,7 +185,7 @@ No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recur
 
 **Decision:** The build pipeline is the performance budget enforcer. Every `index.html` emitted must satisfy:
 1. Full article content is in the HTML at parse time — no JS needed to see content.
-2. All `<script>` tags use `defer` or `type="module"` — never blocking.
+2. All `<script>` tags use `defer`, `async`, or `type="module"` — never blocking. (`async` is acceptable for third-party snippets like analytics; `defer` or `type="module"` for all first-party scripts.)
 3. Critical CSS is inlined in `<head>` or loaded with `<link rel="preload">`.
 4. No synchronous fetch or JSON.parse on the main thread during page load.
 5. Background data (index.json, translation bundles) loaded via Web Worker + DB.js after paint.
