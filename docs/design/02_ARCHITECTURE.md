@@ -32,7 +32,7 @@ These modules come from the akao codebase and are kept unchanged. All new CMS co
 | `States.js`           | ES6 Proxy reactive state. Components subscribe to keys via `.on("key", callback)`. Unsubscribe via returned function.                                                         |
 | `Context.js`          | Global app state singleton — current locale, theme. Backed by localStorage.                                                                                                   |
 | `Threads.js`          | Web Worker pool — 9 background threads. CMS will add a `cms` worker for Markdown parsing at scale.                                                                            |
-| `Stores.js`           | 5 named IndexedDB stores: Hashes, Statics, Auth, Lives, Cart. CMS uses Hashes + Statics.                                                                                      |
+| `Stores.js`           | 2 named IndexedDB stores: Hashes, Statics.                                                                                                                                    |
 
 ---
 
@@ -211,27 +211,27 @@ No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recur
 
 ### `cms/src/` — Zero-environment kernel (isomorphic, no I/O)
 
-| File          | Owns                                                                                            | FRs                    |
-| ------------- | ----------------------------------------------------------------------------------------------- | ---------------------- |
+| File          | Owns                                                                                                                     | FRs                    |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
 | `meta.js`     | Reads `meta.json` via `FS.load()` (auto-parses JSON), validates required fields, returns meta object or structured error | FR-1.1, FR-1.3, FR-1.6 |
-| `markdown.js` | Reads `<locale>.md` body (no frontmatter fence), converts Markdown → HTML, ~150–180 lines       | FR-1.2                 |
-| `config.js`   | Loads + validates `cms/config.yaml`, exposes frozen `{ locales, categories, adsense, site }`    | FR-2.4, FR-2.5         |
-| `index.js`    | Builds content index, emits `build/manifest.json` (ADR-002), drives hash-diff incremental logic | FR-2.2, FR-2.3, FR-2.6 |
-| `seo.js`      | Generates `<meta>`, OG tags, canonical, JSON-LD Article schema per page                         | FR-4.1, FR-4.2, FR-4.3 |
-| `feed.js`     | Emits `build/sitemap.xml`, `build/rss.xml`, `build/robots.txt`                                  | FR-4.4, FR-4.5, FR-4.6 |
+| `markdown.js` | Reads `<locale>.md` body (no frontmatter fence), converts Markdown → HTML, ~150–180 lines                                | FR-1.2                 |
+| `config.js`   | Loads + validates `cms/config.yaml`, exposes frozen `{ locales, categories, adsense, site }`                             | FR-2.4, FR-2.5         |
+| `index.js`    | Builds content index, emits `build/manifest.json` (ADR-002), drives hash-diff incremental logic                          | FR-2.2, FR-2.3, FR-2.6 |
+| `seo.js`      | Generates `<meta>`, OG tags, canonical, JSON-LD Article schema per page                                                  | FR-4.1, FR-4.2, FR-4.3 |
+| `feed.js`     | Emits `build/sitemap.xml`, `build/rss.xml`, `build/robots.txt`                                                           | FR-4.4, FR-4.5, FR-4.6 |
 
 **Removed:** `yaml.js` (custom inline YAML parser) — eliminated; `FS.js` auto-parses `.json` natively via `JSON.parse()`, no custom parser needed. `frontmatter.js` — eliminated; metadata and body are now separate files, no fence splitting required.
 
 ### `builder/cms/` — Build orchestration (Node.js only)
 
-| File               | Owns                                                                                           | FRs             |
-| ------------------ | ---------------------------------------------------------------------------------------------- | --------------- |
-| `cms.js`           | CLI entry point — `npm run build:cms`                                                          | FR-2.1          |
+| File               | Owns                                                                                                                                                | FRs             |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `cms.js`           | CLI entry point — `npm run build:cms`                                                                                                               | FR-2.1          |
 | `ingest.js`        | Recursively scans `content/posts/published/**` + `content/pages/**` only; `draft/` and `archived/` are never touched; draft exclusion is structural | FR-1.4, FR-1.5  |
-| `pipeline.js`      | Drives full build loop: ingest → index → render → routes → feed                                | FR-2.1          |
-| `render.js`        | Assembles HTML per article per locale, writes to `build/{locale}/{category}/{slug}/index.html` | FR-2.6, FR-3.1  |
-| `routes-inject.js` | Appends article/category/tag/page routes to Router manifest                                    | FR-3.1–3.5      |
-| `errors.js`        | Appends `{ ts, file, error }` to `build/errors.log` — never throws                             | FR-1.4, ADR-004 |
+| `pipeline.js`      | Drives full build loop: ingest → index → render → routes → feed                                                                                     | FR-2.1          |
+| `render.js`        | Assembles HTML per article per locale, writes to `build/{locale}/{category}/{slug}/index.html`                                                      | FR-2.6, FR-3.1  |
+| `routes-inject.js` | Appends article/category/tag/page routes to Router manifest                                                                                         | FR-3.1–3.5      |
+| `errors.js`        | Appends `{ ts, file, error }` to `build/errors.log` — never throws                                                                                  | FR-1.4, ADR-004 |
 
 ### `src/UI/components/` — Web Components (browser, light DOM)
 
@@ -405,14 +405,14 @@ if (/<script(?![^>]*\b(defer|async|type=["']module["'])\b)[^>]*>/i.test(html)) {
 
 ## Validation Results
 
-| Requirement           | Coverage                                                    | Status |
-| --------------------- | ----------------------------------------------------------- | ------ |
-| All 21 FRs            | Specific files assigned                                     | ✅      |
-| NFR-1 Zero deps       | All modules inline                                          | ✅      |
-| NFR-2 Build perf      | Incremental build designed; full 330K needs `--locale` flag | ⚠️ Note |
-| NFR-3 Page perf       | Pre-render + light DOM                                      | ✅      |
-| NFR-4 Isomorphic      | Kernel boundary enforced by import rules                    | ✅      |
-| NFR-5 Fault isolation | errors.log pattern throughout                               | ✅      |
+| Requirement           | Coverage                                                      | Status |
+| --------------------- | ------------------------------------------------------------- | ------ |
+| All 21 FRs            | Specific files assigned                                       | ✅      |
+| NFR-1 Zero deps       | All modules inline                                            | ✅      |
+| NFR-2 Build perf      | Incremental build designed; full 330K needs `--locale` flag   | ⚠️ Note |
+| NFR-3 Page perf       | Pre-render + light DOM                                        | ✅      |
+| NFR-4 Isomorphic      | Kernel boundary enforced by import rules                      | ✅      |
+| NFR-5 Fault isolation | errors.log pattern throughout                                 | ✅      |
 | NFR-6 Safety gate     | Validation inside meta.js reader; draft/ folder never scanned | ✅      |
 
 **Overall verdict: READY FOR IMPLEMENTATION**

@@ -1,0 +1,27 @@
+{
+  "name": "cms",
+  "version": "1.0.0",
+  "description": "A zero-dependency, AI-driven, AdSense-ready static site generator.",
+  "scripts": {
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akaoio/cms.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/akaoio/cms/issues"
+  },
+  "homepage": "https://github.com/akaoio/cms#readme",
+  "devDependencies": {
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3"
+  }
+}

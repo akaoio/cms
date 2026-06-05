@@ -16,19 +16,19 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
 
 ## Data Flow Diagram
 
-```
-┌──────────────────┐   Markdown files      ┌─────────────────────────┐
-│   AI AGENTS      │ ─────────────────────→│        AKAO CMS         │
-│                  │                        │                         │
-│  - Text gen      │ ←── trigger build ─── │  content/posts/*.md     │
-│  - Image gen     │                        │  npm run build:cms      │
-│  - Scheduler     │                        │  → HTML + AdSense       │
-│                  │                        │  → sitemap.xml + rss    │
-└────────┬─────────┘                        │  → build/errors.log     │
-         │                                  └──────────┬──────────────┘
-         │ MCP tool calls                              │ Static HTML
-         │ post(url, teaser)                           │ + .hash files
-         ↓                                             ↓
+```text
+┌──────────────────┐   Markdown files      ┌──────────────────────────┐
+│   AI AGENTS      │ ─────────────────────→│        AKAO CMS          │
+│                  │                       │                          │
+│  - Text gen      │ ←── trigger build ─── │  content/posts/*.md      │
+│  - Image gen     │                       │  npm run build:cms       │
+│  - Scheduler     │                       │  → HTML + AdSense        │
+│                  │                       │  → sitemap.xml + rss     │
+└────────┬─────────┘                       │  → build/errors.log      │
+         │                                 └──────────┬───────────────┘
+         │ MCP tool calls                             │ Static HTML
+         │ post(url, teaser)                          │ + .hash files
+         ↓                                            ↓
 ┌──────────────────┐                        ┌─────────────────────────┐
 │   SOCIAL MCP     │                        │   CDN / Website         │
 │                  │                        │                         │
@@ -42,8 +42,8 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
          │                                  ┌─────────────────────────┐
          │ Organic reach                    │    GOOGLE ADSENSE       │
          ↓                                  │                         │
-   Facebook Users  ──── click link ────────→│  Impression → ~$0.001  │
-                                            │  Click     → ~$0.05+   │
+   Facebook Users  ──── click link ────────→│  Impression → ~$0.001   │
+                                            │  Click     → ~$0.05+    │
                                             │  Net 30 → Bank          │
                                             └─────────────────────────┘
 ```
@@ -52,7 +52,7 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
 
 ## Automated Trigger Chain (zero humans required)
 
-```
+```text
 1. AI Agent receives topic/keyword or reads RSS feed
 2. AI generates article content (title, body, meta description, image URL)
 3. AI writes:
@@ -89,7 +89,7 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
 
 ## Scale Requirements
 
-```
+```text
 Operating assumptions:
   - 10 Facebook pages
   - 5 posts/page/day
@@ -145,7 +145,8 @@ Phase 2 (18 locales):
 Social MCP at `/Users/mac/Documents/freelancer/socialmcp`:
 
 **Architecture:**
-```
+
+```text
 AI Agent → Node MCP Server → Chrome Extension → Content Script → facebook.com
 ```
 
@@ -154,6 +155,7 @@ AI Agent → Node MCP Server → Chrome Extension → Content Script → faceboo
 **Goal:** Post article link to multiple FB pages simultaneously, without DOM parsing
 
 **What each Facebook post needs:**
+
 - CMS article URL (required)
 - Short teaser text (AI generated)
 - Open Graph image preview — CMS must have correct OG tags for Facebook to render correctly
