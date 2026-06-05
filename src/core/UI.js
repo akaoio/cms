@@ -119,7 +119,7 @@ function html(strings, ...values) {
         }
     }
 
-    const htmlString = htmlParts.join("").trim().replace(WHITESPACE_REGEX, "><")
+    const htmlString = htmlParts.join("").trim()
 
     /**
      * STEP 2: Process self-closing custom elements
@@ -296,7 +296,7 @@ function renderTemplateResult(templateResult, container, options = {}) {
         let value = values[index]
         const parent = node.parentNode
 
-        if (!parent) return
+        if (!parent) continue
 
         // Case 0: Function → call it with context parameters
         if (typeof value === "function")

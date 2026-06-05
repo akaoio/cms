@@ -22,7 +22,7 @@ export function setLocale(locale) {
 
 export function getTheme() {
     const memory = globalThis.localStorage?.getItem("theme")
-    const system = globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+    const system = globalThis.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light"
     const theme = memory || system || "light"
     if (theme !== memory) globalThis.localStorage?.setItem("theme", theme)
     if (globalThis.document) globalThis.document.documentElement.dataset.theme = theme

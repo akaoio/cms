@@ -71,7 +71,7 @@ export class Router {
         if (search) for (const [key, value] of new URLSearchParams(search)) if (!(key in result.params)) result.params[key] = value
 
         // Create new path including locale
-        result.path = `/${[result.locale.code, ...segments].join("/")}/`
+        result.path = `/${[result.locale?.code ?? locales?.[0]?.code ?? "en", ...segments].join("/")}/`
         return result
     }
 

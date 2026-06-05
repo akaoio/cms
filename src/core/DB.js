@@ -71,11 +71,13 @@ export class DB {
             return Indexes.Statics.get(path).once()
         }
 
-        if (hashres.ok) await Indexes.Hashes.get(path).put(hash)
         if (type === "hash") return hash
 
         const data = await FS.load(path)
-        if (typeof data !== "undefined") await Indexes.Statics.get(path).put(data)
+        if (typeof data !== "undefined") {
+            await Indexes.Statics.get(path).put(data)
+            if (hashres.ok) await Indexes.Hashes.get(path).put(hash)
+        }
         else if (memory && hashres.status === 404) {
             await Indexes.Hashes.del(path)
             await Indexes.Statics.del(path)

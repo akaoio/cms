@@ -77,7 +77,7 @@ if (DEV) {
          * Register component class with module URL for HMR tracking
          * Called automatically by Component base class
          */
-        reg(url, cls) {
+        tagComp(url, cls) {
             if (!cls || typeof cls !== "function") return
 
             // If URL not provided, try to read from static module property
@@ -354,7 +354,7 @@ if (DEV) {
         /**
          * Register module and dependencies
          */
-        reg(url, exports, deps = []) {
+        registerDeps(url, exports, deps = []) {
             this.modules.set(url, {
                 exports,
                 timestamp: Date.now(),
