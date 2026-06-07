@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "A zero-dependency, AI-driven, AdSense-ready static site generator.",
   "scripts": {
-    "build:cms": "node builder/cms.js"
+    "build:cms": "node builder/cms.js",
+    "test:core": "node --test \"src/core/__test__/**/*.js\"",
+    "test:cms": "node --test \"src/cms/__test__/**/*.js\""
   },
   "repository": {
     "type": "git",

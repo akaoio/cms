@@ -55,12 +55,12 @@ content/pages/YYYY/MM/DD/XX/YY/
 builder/cms/ingest.js       (recursively scans published/** only; draft/ never touched)
         │
         ▼
-cms/src/meta.js             (reads meta.json via FS.load → JSON.parse, validates required fields)
-cms/src/markdown.js         (reads <locale>.md body, converts to HTML)
+cms/meta.js             (reads meta.json via FS.load → JSON.parse, validates required fields)
+cms/markdown.js         (reads <locale>.md body, converts to HTML)
         │
         ▼
 builder/cms/render.js       (assembles full HTML page + SEO tags)
-cms/src/seo.js              (generates <meta>, OG, JSON-LD)
+cms/seo.js              (generates <meta>, OG, JSON-LD)
         │
         ▼
 build/{locale}/{cat}/{slug}/
@@ -86,7 +86,7 @@ DB.js validates hash        (background: serves from IndexedDB cache if unchange
 
 ### ADR-001: Module Boundary — Shared Kernel Pattern
 
-**Decision:** `cms/src/` (kernel) contains zero environment calls. Platform adapters (`node-adapter.js`, `browser-adapter.js`) sit above the kernel. Kernel code never imports adapters.
+**Decision:** `cms/` (kernel) contains zero environment calls. Platform adapters (`node-adapter.js`, `browser-adapter.js`) sit above the kernel. Kernel code never imports adapters.
 
 **Why:** Enforces isomorphic guarantee by import graph structure, not developer discipline. Every kernel module testable in Node without a browser harness.
 
@@ -209,7 +209,7 @@ No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recur
 
 ## New CMS Files — FR Mapping
 
-### `cms/src/` — Zero-environment kernel (isomorphic, no I/O)
+### `cms/` — Zero-environment kernel (isomorphic, no I/O)
 
 | File          | Owns                                                                                                                     | FRs                    |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
@@ -302,10 +302,10 @@ for (const file of files) {
 
 ---
 
-### Pattern 3: Isomorphic kernel — no env APIs in `cms/src/`
+### Pattern 3: Isomorphic kernel — no env APIs in `cms/`
 
 ```js
-// ❌ FORBIDDEN inside cms/src/
+// ❌ FORBIDDEN inside cms/
 import fs from "fs"            // Node-only
 document.querySelector(...)    // Browser-only
 fetch(url)                     // Use FS.load() instead
@@ -317,14 +317,14 @@ import { FS } from "../../src/core/FS.js" // Node (build scripts)
 
 ---
 
-### Pattern 4: Config access — always via `cms/src/config.js`
+### Pattern 4: Config access — always via `cms/config.js`
 
 ```js
 // ❌ WRONG — hardcoded
 const locales = ["en", "vi", "es"]
 
 // ✅ CORRECT — from config
-import { config } from "../../cms/src/config.js"
+import { config } from "../../cms/config.js"
 const locales = config.locales.active
 ```
 
@@ -442,14 +442,14 @@ Before any story is started:
 2.  Delete eCommerce/DeFi code
 3.  Create cms/config.yaml + content/posts/draft/ + content/posts/published/ + content/pages/ + test fixtures
 4.  Write test fixtures for meta.js and markdown.js (follow Pattern 6 folder layout above)
-5.  Meta reader + validator (cms/src/meta.js) — reads meta.json via FS.load, validates required fields
-6.  Markdown → HTML converter (cms/src/markdown.js) — reads body .md, no fence splitting
+5.  Meta reader + validator (cms/meta.js) — reads meta.json via FS.load, validates required fields
+6.  Markdown → HTML converter (cms/markdown.js) — reads body .md, no fence splitting
 7.  build:cms pipeline (builder/cms.js + builder/cms/pipeline.js)
 8.  Hash generation + errors.log (builder/cms/errors.js)
-9.  Content index + manifest.json (cms/src/index.js)
+9.  Content index + manifest.json (cms/index.js)
 10. Route injection (builder/cms/routes-inject.js) — 4 patterns only, constant size
-11. SEO module (cms/src/seo.js)
-12. Sitemap + RSS + robots.txt (cms/src/feed.js)
+11. SEO module (cms/seo.js)
+12. Sitemap + RSS + robots.txt (cms/feed.js)
 13. Verify: build/ output matches contract in SCOPE.md
 14. Assert: grep emitted HTML for <script without defer/async/type="module" → fail build if found
 15. <cms-list> Web Component (light DOM, no attachShadow)

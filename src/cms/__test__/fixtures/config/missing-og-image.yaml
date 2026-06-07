@@ -1,0 +1,7 @@
+site:
+  url: https://example.com
+  title: Example Publication
+analytics:
+  ga4_measurement_id: G-EXAMPLE123
+quality_gate:
+  min_word_count: 600

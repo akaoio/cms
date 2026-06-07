@@ -53,7 +53,6 @@ Akao CMS is built on top of the **akao shop project** by deleting all eCommerce/
 | `Stores.js`   | `src/core/Stores.js`   | IndexedDB store abstraction — shared state across modules.                                                                                                                             |
 | `Events.js`   | `src/core/Events.js`   | Event bus.                                                                                                                                                                             |
 | `Threads.js`  | `src/core/Threads.js`  | Web Worker pool manager. Offloads heavy tasks (e.g. Markdown parsing at scale) to background threads so the browser stays responsive.                                                  |
-| `HMR.js`      | `src/core/HMR.js`      | Hot reload — dev only.                                                                                                                                                                 |
 | `WebAuthn.js` | `src/core/WebAuthn.js` | Admin auth — Phase 2 only.                                                                                                                                                             |
 
 ### Code DELETED

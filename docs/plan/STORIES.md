@@ -28,7 +28,7 @@
 **Changes from boss revise round 2 (2026-06-02):**
 
 - Story 1.0: REWRITTEN — factory-model folder structure (`draft/`, `published/`), fixtures use new layout
-- Story 1.1: REWRITTEN — was "Inline YAML Parser", now "Meta Reader + Validator" (`cms/src/meta.js`)
+- Story 1.1: REWRITTEN — was "Inline YAML Parser", now "Meta Reader + Validator" (`src/cms/meta.js`)
 - Story 1.2: REWRITTEN — was "Frontmatter Parser", now "Markdown Body Loader" (no fence splitting)
 - Story 1.4: Updated ingest path to `content/posts/published/**` only; `draft/` exclusion is structural
 - Story 3.1: TBT < 200ms added to Lighthouse gate
@@ -48,7 +48,7 @@
 
 - `git checkout -b feat/cms-refactor` done
 - All eCommerce/DeFi code deleted — `npm run build:core` still passes
-- `cms/config.yaml` exists with ALL required keys:
+- `src/cms/config.yaml` exists with ALL required keys:
   - `site.default_og_image` — fallback OG image URL
   - `analytics.ga4_measurement_id` — GA4 ID (post-MVP, optional key, no-op if absent)
   - `quality_gate.min_word_count: 600`
@@ -61,10 +61,10 @@
   content/pages/
   ```
 
-- `cms/test/fixtures/` created with the following layout (mirrors production structure):
+- `src/cms/__test__/fixtures/` created with the following layout (mirrors production structure):
 
   ```text
-  cms/test/fixtures/
+  src/cms/__test__/fixtures/
   ├── published/2026/06/01/00/01/
   │   ├── en.md          ← valid article body (no frontmatter fence)
   │   └── meta.json      ← all required fields present
@@ -90,7 +90,7 @@
 
 ### Story 1.1 — Meta Reader + Validator
 
-**File:** `cms/src/meta.js`  
+**File:** `src/cms/meta.js`  
 **Why first:** Replaces both `yaml.js` (dropped) and `frontmatter.js` (dropped). All article metadata now lives in `meta.json` — read via `FS.load()` which auto-parses `.json` files natively. No custom parser needed.
 
 **DoD:**
@@ -99,14 +99,14 @@
 - Validates required fields: `title`, `date`, `category` — throws `{ code: 'MISSING_FIELD', field, dir }` on missing
 - Optional fields passed through: `slug`, `tags`, `description`, `image`, `lang`, `fb_caption`, `publish_at`, `updated_at`
 - **No `draft` or `status` field** — status is determined by folder position, not field value
-- Test suite `cms/test/meta.test.js` using all 7 fixtures from Story 1.0 — passes with zero dependencies
+- Test suite `src/cms/__test__/meta.test.js` using all 7 fixtures from Story 1.0 — passes with zero dependencies
 - Zero external imports (`FS.js` is a core module, not a dependency)
 
 ---
 
 ### Story 1.2 — Markdown Body Loader
 
-**File:** `cms/src/markdown.js`  
+**File:** `src/cms/markdown.js`  
 **Note:** `frontmatter.js` is eliminated — no `---` fence to split. Body `.md` files contain article content only.
 
 **DoD:**
@@ -121,7 +121,7 @@
 
 ### Story 1.3 — Markdown to HTML Converter
 
-**File:** `cms/src/markdown.js`
+**File:** `src/cms/markdown.js`
 
 **DoD:**
 
@@ -152,7 +152,7 @@
 
 ### Story 1.5 — Hash Generation + Incremental Build
 
-**Files:** `cms/src/index.js` (hash diff logic), `builder/cms/pipeline.js`
+**Files:** `src/cms/index.js` (hash diff logic), `builder/cms/pipeline.js`
 
 **DoD:**
 
@@ -166,11 +166,11 @@
 
 ### Story 1.6 — Content Index + Config System
 
-**Files:** `cms/src/config.js`, `cms/src/index.js`
+**Files:** `src/cms/config.js`, `src/cms/index.js`
 
 **DoD:**
 
-- `config.js` loads `cms/config.yaml`, returns frozen object, throws on missing required keys
+- `config.js` loads `src/cms/config.yaml`, returns frozen object, throws on missing required keys
 - `build/index.json` contains all published articles: `{ slug, title, date, category, tags, description, locale, url }`
 - `active: [en, es]` in config → HTML output in both `build/en/` and `build/es/`
 - Adding category to config → articles with that category appear in index — zero code changes
@@ -202,7 +202,7 @@
 
 ### Story 1.8 — SEO Module + GA4 Injection
 
-**File:** `cms/src/seo.js`, `builder/cms/render.js`
+**File:** `src/cms/seo.js`, `builder/cms/render.js`
 
 **DoD:**
 
@@ -219,7 +219,7 @@
 
 ### Story 1.9 — Sitemap + RSS + robots.txt
 
-**File:** `cms/src/feed.js`
+**File:** `src/cms/feed.js`
 
 **DoD:**
 
@@ -232,7 +232,7 @@
 
 ### Story 1.10 — index.json Pagination *(trigger-based — implement when count > 5K)*
 
-**File:** `cms/src/index.js`, `builder/cms/pipeline.js`
+**File:** `src/cms/index.js`, `builder/cms/pipeline.js`
 **Boss revise R3:** 330K articles × 200 bytes = 66MB browser download. Must paginate before scale.
 
 **Trigger:** Implement this story when total article count exceeds 5,000 (50% buffer before 10K danger threshold).
@@ -302,10 +302,10 @@
 
 **DoD:**
 
-- AdSense `<script>` with `publisher_id` from `cms/config.yaml` in page HTML
+- AdSense `<script>` with `publisher_id` from `src/cms/config.yaml` in page HTML
 - Ad containers are direct light DOM children — NOT inside any Shadow DOM
 - Containers have NO `contain`, `transform`, `will-change`, `filter` CSS
-- Correct slot IDs from `cms/config.yaml` `adsense.slots`
+- Correct slot IDs from `src/cms/config.yaml` `adsense.slots`
 - AdSense iframe renders on mobile Chrome
 
 ---
@@ -326,7 +326,7 @@
 
 ### Story 3.1 — End-to-End Integration Test
 
-**File:** `cms/test/integration.js`
+**File:** `src/cms/__test__/integration.js`
 
 **DoD:**
 

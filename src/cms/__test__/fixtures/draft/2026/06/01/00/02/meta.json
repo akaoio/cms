@@ -1,0 +1,8 @@
+{
+    "title": "Draft Article Awaiting Review",
+    "date": "2026-06-01T00:00:00.000Z",
+    "category": "technology",
+    "slug": "draft-article-awaiting-review",
+    "tags": ["draft"],
+    "description": "An article still being drafted — must never be picked up by the build pipeline."
+}

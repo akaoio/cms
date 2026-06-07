@@ -22,9 +22,9 @@ export async function write(path = [], content) {
     // Serialize to string based on file extension
     let data
     const ext = file.slice(file.lastIndexOf(".") + 1).toLowerCase()
-    if (ext === "json")                    data = JSON.stringify(content, null, 4)
-    else if (ext === "csv")                data = stringifyCSV(content, { delimiter: "," })
-    else if (ext === "tsv")                data = stringifyCSV(content, { delimiter: "\t" })
+    if (ext === "json") data = JSON.stringify(content, null, 4)
+    else if (ext === "csv") data = stringifyCSV(content, { delimiter: "," })
+    else if (ext === "tsv") data = stringifyCSV(content, { delimiter: "\t" })
     else if (ext === "yaml" || ext === "yml")
         // Browser has no YAML library — JSON is valid YAML so readers will parse it correctly
         data = !BROWSER ? YAML.stringify(content) : typeof content === "string" ? content : JSON.stringify(content, null, 4)
