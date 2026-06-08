@@ -7,7 +7,7 @@ export async function $put(path, value) {
     if (BROWSER)
         await this.execute({
             mode: "readwrite",
-            operation: (store) => store.put(value, path)
+            operation: (store) => store.put(value, JSON.stringify(path))
         })
 
     if (NODE) {

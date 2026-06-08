@@ -13,10 +13,13 @@ class IDB {
         this.callbacks = new Map()
         this.idb = null
 
-        this.ready = new Promise(async (resolve) => {
-            if (BROWSER) {
-                // Initialize IndexedDB
-                const request = indexedDB.open(name, 1)
+        this.ready = this._init()
+    }
+
+    async _init() {
+        if (BROWSER) {
+            await new Promise((resolve) => {
+                const request = indexedDB.open(this.name, 1)
                 request.onerror = (event) => {
                     console.error("IndexedDB error:", event.target.error)
                     resolve()
@@ -29,11 +32,10 @@ class IDB {
                     this.idb = event.target.result
                     resolve()
                 }
-            } else if (NODE) {
-                await init.call(this)
-                resolve()
-            }
-        })
+            })
+        } else if (NODE) {
+            await init.call(this)
+        }
     }
 
     // Public methods

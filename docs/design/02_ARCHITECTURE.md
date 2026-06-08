@@ -1,7 +1,79 @@
 # Architecture — Akao CMS
 
-**Status:** ✅ Updated — 2026-06-02 (boss revise: file structure ADR-005, factory folders ADR-006, JSON meta ADR-007, perf Pattern 7)  
+**Status:** ✅ Updated — 2026-06-08 (add canonical directory tree §1; kernel confirmed at `cms/` root; config format confirmed as JSON)  
 **Full document:** `_bmad-output/planning-artifacts/architecture.md`
+
+---
+
+## §1 — Directory Structure (source of truth)
+
+```
+akao-cms/
+├── cms/                              ← kernel: isomorphic, zero env calls (ADR-001)
+│   ├── config.js                     ← loads + validates cms/config.json
+│   ├── config.json                   ← site config (locales, categories, adsense, quality_gate)
+│   ├── feed.js                       ← emits sitemap.xml, rss.xml, robots.txt
+│   ├── index.js                      ← builds manifest.json, drives incremental logic
+│   ├── markdown.js                   ← Markdown → HTML, no frontmatter fence
+│   ├── meta.js                       ← reads + validates meta.json
+│   ├── seo.js                        ← generates <meta>, OG, JSON-LD per page
+│   └── __test__/
+│       └── fixtures/
+│           ├── config/               ← JSON config fixtures for config.test.js
+│           ├── draft/                ← draft article fixtures (must NOT appear in build)
+│           └── published/            ← published article fixtures
+│
+├── builder/
+│   └── cms/                          ← build pipeline: Node.js only
+│       ├── cms.js                    ← CLI entry point (npm run build:cms)
+│       ├── errors.js                 ← appends { ts, file, error } to build/errors.log
+│       ├── ingest.js                 ← scans content/posts/published/** only
+│       ├── pipeline.js               ← ingest → index → render → routes → feed
+│       ├── render.js                 ← assembles HTML per article per locale
+│       └── routes-inject.js          ← appends routes to Router manifest
+│
+├── content/
+│   ├── posts/
+│   │   ├── draft/YYYY/MM/DD/XX/YY/  ← AI writes here; never scanned by build (ADR-006)
+│   │   ├── published/YYYY/MM/DD/XX/YY/ ← build reads here only
+│   │   └── archived/YYYY/MM/DD/XX/YY/  ← redirect stubs; URL never 404s
+│   └── pages/YYYY/MM/DD/XX/YY/
+│       ├── en.md
+│       └── meta.json
+│
+├── src/
+│   ├── core/                         ← runtime modules: isomorphic (Node + browser)
+│   │   ├── Context.js
+│   │   ├── DB.js
+│   │   ├── Events.js
+│   │   ├── FS.js
+│   │   ├── IDB.js
+│   │   ├── Router.js
+│   │   ├── States.js
+│   │   ├── Stores.js
+│   │   ├── Threads.js
+│   │   └── UI.js
+│   └── UI/
+│       ├── components/
+│       │   ├── cms-list/index.js     ← category/tag listing, pagination
+│       │   └── cms-page/index.js     ← renders article HTML, AdSense slots
+│       └── routes/
+│           ├── article/[locale]/[category]/[slug]/
+│           ├── category/[category]/
+│           └── tag/[tag]/
+│
+└── build/                            ← generated output (not committed to git)
+    ├── {locale}/{category}/{slug}/
+    │   ├── index.html                ← complete pre-rendered HTML
+    │   └── index.hash                ← SHA-256 of HTML
+    ├── errors.log
+    ├── index.json
+    ├── manifest.json
+    ├── rss.xml
+    └── sitemap.xml
+```
+
+> ADR-001 governs the `cms/` vs `src/` boundary. ADR-005 governs `YYYY/MM/DD/XX/YY/` path format. ADR-006 governs `draft/published/archived/` layout.
 
 ---
 

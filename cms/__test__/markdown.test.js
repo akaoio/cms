@@ -1,10 +1,10 @@
 // Fixture-first test for src/cms/markdown.js — see TEST_PLAN.md B4/B5 / STORIES.md Story 1.2 & 1.3
 import { test } from "node:test"
 import assert from "node:assert"
-import { FS } from "../../core/FS.js"
+import { FS } from "../../src/core/FS.js"
 import { parseMarkdown } from "../markdown.js"
 
-const FIXTURES = ["src", "cms", "__test__", "fixtures"]
+const FIXTURES = ["cms", "__test__", "fixtures"]
 const dir = (...parts) => [...FIXTURES, ...parts]
 
 test("markdown — body loader", async (t) => {

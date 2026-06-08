@@ -16,6 +16,9 @@ export function on(...args) {
     // Check if immediate call is requested
     const call = rest.find((arg) => typeof arg === "boolean")
 
+    // Guard: key provided but no subscriber — fail loudly instead of returning undefined
+    if (key && !sub) throw new TypeError(`States.on: key "${Array.isArray(key) ? key.join(".") : key}" provided but no subscriber given`)
+
     // Global subscription: no specific key
     if (!key && cb) {
         this.SET.add(cb)

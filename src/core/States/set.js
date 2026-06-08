@@ -10,9 +10,7 @@ export function set(data) {
     else if (Array.isArray(data)) data.forEach((k) => (this.proxy[k] = true))
     // Object: set each key-value pair
     else Object.entries(data).forEach(([k, v]) => (this.proxy[k] = v))
-    // Notify changes after all sets are done
-    while (this.notifications.length) {
-        const { key, value, last, target, receiver } = this.notifications.shift()
-        this.notify({ key, value, last, target, receiver })
-    }
+    // Snapshot queue before draining to guard against re-entrant set() calls from subscribers
+    const pending = this.notifications.splice(0)
+    for (const n of pending) this.notify(n)
 }
