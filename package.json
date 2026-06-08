@@ -1,0 +1,23 @@
+{
+  "name": "cms",
+  "version": "1.0.0",
+  "description": "A zero-dependency, AI-driven, AdSense-ready static site generator.",
+  "scripts": {
+    "build:cms": "node src/builder/cms.js",
+    "test:core": "node --test \"src/core/__test__/**/*.js\"",
+    "test:cms": "node --test \"src/cms/__test__/**/*.js\"",
+    "test": "npm run test:core && npm run test:cms"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akaoio/cms.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/akaoio/cms/issues"
+  },
+  "homepage": "https://github.com/akaoio/cms#readme"
+}

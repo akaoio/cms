@@ -1,0 +1,1 @@
+This article is still being drafted. It is syntactically valid and would pass every quality check, but it lives in the `draft/` folder, so the ingest scanner must skip it entirely. If this content ever ends up in the build output, the fixture's purpose has been violated.

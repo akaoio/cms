@@ -1,0 +1,8 @@
+{
+    "semi": false,
+    "tabWidth": 4,
+    "printWidth": 1024,
+    "trailingComma": "none",
+    "htmlWhitespaceSensitivity": "ignore",
+    "bracketSameLine": true
+}

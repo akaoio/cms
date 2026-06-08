@@ -6,6 +6,9 @@ Thumbs.db
 build/
 dist/
 
+# IDB disk persistence (runtime-generated)
+indexed/
+
 # Logs
 *.log
 build/errors.log

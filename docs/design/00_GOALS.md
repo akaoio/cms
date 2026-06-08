@@ -36,13 +36,13 @@
 
 ## Akao Coverage
 
-| Status      | Count | Items                                                    |
-| ----------- | ----- | -------------------------------------------------------- |
-| ✅ Đầy đủ    | 8/16  | #1,2,4,5,8,10,11,12                                      |
-| ⚠️ Partial   | 3/16  | #3,6,13 — thiếu gate/validation/fallback                 |
-| ❌ Chưa có   | 3/16  | #7 fb_caption, #9 auto trigger, #16 revenue (AdSense RPM) |
+| Status      | Count | Items                                                                                   |
+| ----------- | ----- | --------------------------------------------------------------------------------------- |
+| ✅ Đầy đủ    | 8/16  | #1,2,4,5,8,10,11,12                                                                     |
+| ⚠️ Partial   | 3/16  | #3,6,13 — thiếu gate/validation/fallback                                                |
+| ❌ Chưa có   | 3/16  | #7 fb_caption, #9 auto trigger, #16 revenue (AdSense RPM)                               |
 | 🟡 Post-MVP  | 1/16  | #15 GA4 traffic — trivial embed, deferred not because hard but because not MVP-critical |
-| Operational | 1/16  | #14 — document trong AI prompt                           |
+| Operational | 1/16  | #14 — document trong AI prompt                                                          |
 
 **Akao: 8/16 — đủ để không broken, chưa đủ để operate.**
 
@@ -50,11 +50,11 @@
 
 ## Priority
 
-| P   | Item                 | Effort | Lý do                               |
-| --- | -------------------- | ------ | ----------------------------------- |
-| P0  | #7 fb_caption        | Low    | Không có = không post Facebook được |
-| P0  | #6 og:image fallback | Low    | Blank preview = CTR ~0              |
-| P1  | #13+#3 quality gate  | Medium | AdSense flag = recovery mất tháng   |
-| P3  | #15 GA4 traffic      | Trivial | 2 dòng HTML trong `<head>` — post-MVP, không block gì |
-| P3  | #16 AdSense RPM      | Medium | Cần AdSense Reporting API hoặc manual export — post-MVP |
-| P3  | #9 auto trigger      | Medium | Prerequisite cho truly unattended   |
+| P   | Item                 | Effort  | Lý do                                                   |
+| --- | -------------------- | ------- | ------------------------------------------------------- |
+| P0  | #7 fb_caption        | Low     | Không có = không post Facebook được                     |
+| P0  | #6 og:image fallback | Low     | Blank preview = CTR ~0                                  |
+| P1  | #13+#3 quality gate  | Medium  | AdSense flag = recovery mất tháng                       |
+| P3  | #15 GA4 traffic      | Trivial | 2 dòng HTML trong `<head>` — post-MVP, không block gì   |
+| P3  | #16 AdSense RPM      | Medium  | Cần AdSense Reporting API hoặc manual export — post-MVP |
+| P3  | #9 auto trigger      | Medium  | Prerequisite cho truly unattended                       |
