@@ -82,7 +82,7 @@
 
 ---
 
-## Phần C — Test cho Build orchestration (`builder/cms/`)
+## Phần C — Test cho Build orchestration (`src/builder/`)
 
 - [ ] **C1 — Ingest scanner test**
   Story: 1.4 · Module: `ingest.js`
@@ -148,7 +148,7 @@
 | ---- | -------- | ------------------------------------ |
 | A    | 4        | Smoke test hạ tầng (`src/core/`)     |
 | B    | 6        | Kernel modules (`src/cms/`)          |
-| C    | 6        | Build orchestration (`builder/cms/`) |
+| C    | 6        | Build orchestration (`src/builder/`) |
 | D    | 2        | SEO/Feed modules                     |
 | E    | 4        | Web Components & Integration         |
 

@@ -3,7 +3,7 @@ import { test } from "node:test"
 import assert from "node:assert"
 import { readMeta } from "../meta.js"
 
-const FIXTURES = ["cms", "__test__", "fixtures"]
+const FIXTURES = ["src", "cms", "__test__", "fixtures"]
 const dir = (...parts) => [...FIXTURES, ...parts]
 
 test("meta", async (t) => {

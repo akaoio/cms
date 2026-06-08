@@ -1,6 +1,6 @@
 # Architecture — Akao CMS
 
-**Status:** ✅ Updated — 2026-06-08 (add canonical directory tree §1; kernel confirmed at `cms/` root; config format confirmed as JSON)  
+**Status:** ✅ Updated — 2026-06-08 (kernel + builder relocated to `src/cms/` and `src/builder/` — see ADR-001; config format confirmed as JSON)  
 **Full document:** `_bmad-output/planning-artifacts/architecture.md`
 
 ---
@@ -9,29 +9,6 @@
 
 ```
 akao-cms/
-├── cms/                              ← kernel: isomorphic, zero env calls (ADR-001)
-│   ├── config.js                     ← loads + validates cms/config.json
-│   ├── config.json                   ← site config (locales, categories, adsense, quality_gate)
-│   ├── feed.js                       ← emits sitemap.xml, rss.xml, robots.txt
-│   ├── index.js                      ← builds manifest.json, drives incremental logic
-│   ├── markdown.js                   ← Markdown → HTML, no frontmatter fence
-│   ├── meta.js                       ← reads + validates meta.json
-│   ├── seo.js                        ← generates <meta>, OG, JSON-LD per page
-│   └── __test__/
-│       └── fixtures/
-│           ├── config/               ← JSON config fixtures for config.test.js
-│           ├── draft/                ← draft article fixtures (must NOT appear in build)
-│           └── published/            ← published article fixtures
-│
-├── builder/
-│   └── cms/                          ← build pipeline: Node.js only
-│       ├── cms.js                    ← CLI entry point (npm run build:cms)
-│       ├── errors.js                 ← appends { ts, file, error } to build/errors.log
-│       ├── ingest.js                 ← scans content/posts/published/** only
-│       ├── pipeline.js               ← ingest → index → render → routes → feed
-│       ├── render.js                 ← assembles HTML per article per locale
-│       └── routes-inject.js          ← appends routes to Router manifest
-│
 ├── content/
 │   ├── posts/
 │   │   ├── draft/YYYY/MM/DD/XX/YY/  ← AI writes here; never scanned by build (ADR-006)
@@ -42,6 +19,28 @@ akao-cms/
 │       └── meta.json
 │
 ├── src/
+│   ├── cms/                          ← kernel: isomorphic, zero env calls (ADR-001)
+│   │   ├── config.js                 ← loads + validates config.json
+│   │   ├── config.json               ← site config (locales, categories, adsense, quality_gate)
+│   │   ├── feed.js                   ← emits sitemap.xml, rss.xml, robots.txt
+│   │   ├── index.js                  ← builds manifest.json, drives incremental logic
+│   │   ├── markdown.js               ← Markdown → HTML, no frontmatter fence
+│   │   ├── meta.js                   ← reads + validates meta.json
+│   │   ├── seo.js                    ← generates <meta>, OG, JSON-LD per page
+│   │   └── __test__/
+│   │       └── fixtures/
+│   │           ├── config/           ← JSON config fixtures for config.test.js
+│   │           ├── draft/            ← draft article fixtures (must NOT appear in build)
+│   │           └── published/        ← published article fixtures
+│   │
+│   ├── builder/                      ← build pipeline: Node.js only
+│   │   ├── cms.js                    ← CLI entry point (npm run build:cms)
+│   │   ├── errors.js                 ← appends { ts, file, error } to build/errors.log
+│   │   ├── ingest.js                 ← scans content/posts/published/** only
+│   │   ├── pipeline.js               ← ingest → index → render → routes → feed
+│   │   ├── render.js                 ← assembles HTML per article per locale
+│   │   └── routes-inject.js          ← appends routes to Router manifest
+│   │
 │   ├── core/                         ← runtime modules: isomorphic (Node + browser)
 │   │   ├── Context.js
 │   │   ├── DB.js
@@ -73,7 +72,9 @@ akao-cms/
     └── sitemap.xml
 ```
 
-> ADR-001 governs the `cms/` vs `src/` boundary. ADR-005 governs `YYYY/MM/DD/XX/YY/` path format. ADR-006 governs `draft/published/archived/` layout.
+> ADR-001 governs the `src/cms/` boundary (enforced by import-graph lint rules, not by directory placement — see ADR-001 rationale). ADR-005 governs `YYYY/MM/DD/XX/YY/` path format. ADR-006 governs `draft/published/archived/` layout.
+>
+> **Note:** `cms/` and `builder/` live under `src/` alongside `core/` and `UI/` — they are all source code, differing only in runtime target (isomorphic vs. Node-only vs. browser-only), not in architectural importance. This also avoids the `cms` name colliding with the repo name and with itself across the tree (see ADR-001 discussion).
 
 ---
 
@@ -124,15 +125,15 @@ content/pages/YYYY/MM/DD/XX/YY/
   └── meta.json
         │
         ▼
-builder/cms/ingest.js       (recursively scans published/** only; draft/ never touched)
+src/builder/ingest.js       (recursively scans published/** only; draft/ never touched)
         │
         ▼
-cms/meta.js             (reads meta.json via FS.load → JSON.parse, validates required fields)
-cms/markdown.js         (reads <locale>.md body, converts to HTML)
+src/cms/meta.js         (reads meta.json via FS.load → JSON.parse, validates required fields)
+src/cms/markdown.js     (reads <locale>.md body, converts to HTML)
         │
         ▼
-builder/cms/render.js       (assembles full HTML page + SEO tags)
-cms/seo.js              (generates <meta>, OG, JSON-LD)
+src/builder/render.js       (assembles full HTML page + SEO tags)
+src/cms/seo.js          (generates <meta>, OG, JSON-LD)
         │
         ▼
 build/{locale}/{cat}/{slug}/
@@ -158,11 +159,11 @@ DB.js validates hash        (background: serves from IndexedDB cache if unchange
 
 ### ADR-001: Module Boundary — Shared Kernel Pattern
 
-**Decision:** `cms/` (kernel) contains zero environment calls. Platform adapters (`node-adapter.js`, `browser-adapter.js`) sit above the kernel. Kernel code never imports adapters.
+**Decision:** `src/cms/` (kernel) contains zero environment calls. Platform adapters (`node-adapter.js`, `browser-adapter.js`) sit above the kernel. Kernel code never imports adapters. The boundary is enforced by import-graph lint rules (e.g. dependency-cruiser), not by placing the kernel outside `src/` — `src/cms/` sits alongside `src/core/`, `src/builder/`, and `src/UI/` as one of several source layers that differ in runtime target (isomorphic vs. Node-only vs. browser-only), not in architectural tier.
 
-**Why:** Enforces isomorphic guarantee by import graph structure, not developer discipline. Every kernel module testable in Node without a browser harness.
+**Why:** Enforces isomorphic guarantee by import graph structure, not developer discipline. Every kernel module testable in Node without a browser harness. Keeping `cms/` and `builder/` under `src/` also avoids a naming collision: the repo itself is named `cms`, and a root-level `cms/` plus `builder/cms/` would create three overlapping `cms` namespaces — noisy for grep/glob-based search by both humans and coding agents.
 
-**Rejected:** Flat module tree with `typeof window` guards — environment assumptions leak, impossible to audit at 330K-file scale.
+**Rejected:** Flat module tree with `typeof window` guards — environment assumptions leak, impossible to audit at 330K-file scale. Also rejected: root-level `cms/` and `builder/` (as in earlier drafts of this doc) — enforcing the isomorphic boundary by directory placement instead of tooling caused the `cms` name to repeat three times across the tree (repo name, kernel dir, `builder/cms/`), and made `src/` look like it excluded core pipeline code that is, in fact, ordinary versioned source.
 
 ---
 
@@ -281,20 +282,20 @@ No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recur
 
 ## New CMS Files — FR Mapping
 
-### `cms/` — Zero-environment kernel (isomorphic, no I/O)
+### `src/cms/` — Zero-environment kernel (isomorphic, no I/O)
 
 | File          | Owns                                                                                                                     | FRs                    |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
 | `meta.js`     | Reads `meta.json` via `FS.load()` (auto-parses JSON), validates required fields, returns meta object or structured error | FR-1.1, FR-1.3, FR-1.6 |
 | `markdown.js` | Reads `<locale>.md` body (no frontmatter fence), converts Markdown → HTML, ~150–180 lines                                | FR-1.2                 |
-| `config.js`   | Loads + validates `cms/config.yaml`, exposes frozen `{ locales, categories, adsense, site }`                             | FR-2.4, FR-2.5         |
+| `config.js`   | Loads + validates `src/cms/config.yaml`, exposes frozen `{ locales, categories, adsense, site }`                         | FR-2.4, FR-2.5         |
 | `index.js`    | Builds content index, emits `build/manifest.json` (ADR-002), drives hash-diff incremental logic                          | FR-2.2, FR-2.3, FR-2.6 |
 | `seo.js`      | Generates `<meta>`, OG tags, canonical, JSON-LD Article schema per page                                                  | FR-4.1, FR-4.2, FR-4.3 |
 | `feed.js`     | Emits `build/sitemap.xml`, `build/rss.xml`, `build/robots.txt`                                                           | FR-4.4, FR-4.5, FR-4.6 |
 
 **Removed:** `yaml.js` (custom inline YAML parser) — eliminated; `FS.js` auto-parses `.json` natively via `JSON.parse()`, no custom parser needed. `frontmatter.js` — eliminated; metadata and body are now separate files, no fence splitting required.
 
-### `builder/cms/` — Build orchestration (Node.js only)
+### `src/builder/` — Build orchestration (Node.js only)
 
 | File               | Owns                                                                                                                                                | FRs             |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
@@ -374,22 +375,22 @@ for (const file of files) {
 
 ---
 
-### Pattern 3: Isomorphic kernel — no env APIs in `cms/`
+### Pattern 3: Isomorphic kernel — no env APIs in `src/cms/`
 
 ```js
-// ❌ FORBIDDEN inside cms/
+// ❌ FORBIDDEN inside src/cms/
 import fs from "fs"            // Node-only
 document.querySelector(...)    // Browser-only
 fetch(url)                     // Use FS.load() instead
 
 // ✅ ALLOWED — use platform abstractions
-import { FS } from "/core/FS.js"          // browser
-import { FS } from "../../src/core/FS.js" // Node (build scripts)
+import { FS } from "/core/FS.js"   // browser
+import { FS } from "../core/FS.js" // Node (build scripts)
 ```
 
 ---
 
-### Pattern 4: Config access — always via `cms/config.js`
+### Pattern 4: Config access — always via `src/cms/config.js`
 
 ```js
 // ❌ WRONG — hardcoded
@@ -415,7 +416,7 @@ const locales = config.locales.active
 Write fixtures before writing any parser. New structure mirrors the factory-model folder layout:
 
 ```
-cms/test/fixtures/
+src/cms/__test__/fixtures/
 ├── published/
 │   └── 2026/06/01/00/01/
 │       ├── en.md                ← valid article body (no frontmatter fence)
@@ -444,7 +445,7 @@ Use plain `assert.deepStrictEqual` — no test framework, zero deps.
 
 ### Pattern 7: Performance — HTML-First Output Requirements
 
-Every `index.html` emitted by the build pipeline must satisfy these constraints before it leaves `builder/cms/render.js`:
+Every `index.html` emitted by the build pipeline must satisfy these constraints before it leaves `src/builder/render.js`:
 
 ```js
 // ❌ WRONG — blocks parse
@@ -465,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 **Build-time enforcement** (step 14 of implementation sequence):
 ```js
-// builder/cms/render.js — after assembling HTML string, before writing:
+// src/builder/render.js — after assembling HTML string, before writing:
 if (/<script(?![^>]*\b(defer|async|type=["']module["'])\b)[^>]*>/i.test(html)) {
   throw new Error(`render.js: emitted <script> without defer/async/type=module in ${slug}`)
 }
@@ -499,9 +500,9 @@ Before any story is started:
 
 - [ ] `git checkout -b feat/cms-refactor`
 - [ ] All eCommerce/DeFi code deleted (see `SCOPE.md` list)
-- [ ] `cms/config.yaml` created with real values — no placeholders
+- [ ] `src/cms/config.yaml` created with real values — no placeholders
 - [ ] `content/posts/` and `content/pages/` directories exist
-- [ ] `cms/test/fixtures/` created with the 6 fixture files above
+- [ ] `src/cms/__test__/fixtures/` created with the 6 fixture files above
 - [ ] Fixtures committed **before** any parser code is written
 - [ ] `/akao-skill-orient` run in current session
 
@@ -512,21 +513,21 @@ Before any story is started:
 ```
 1.  git checkout -b feat/cms-refactor
 2.  Delete eCommerce/DeFi code
-3.  Create cms/config.yaml + content/posts/draft/ + content/posts/published/ + content/pages/ + test fixtures
+3.  Create src/cms/config.yaml + content/posts/draft/ + content/posts/published/ + content/pages/ + test fixtures
 4.  Write test fixtures for meta.js and markdown.js (follow Pattern 6 folder layout above)
-5.  Meta reader + validator (cms/meta.js) — reads meta.json via FS.load, validates required fields
-6.  Markdown → HTML converter (cms/markdown.js) — reads body .md, no fence splitting
-7.  build:cms pipeline (builder/cms.js + builder/cms/pipeline.js)
-8.  Hash generation + errors.log (builder/cms/errors.js)
-9.  Content index + manifest.json (cms/index.js)
-10. Route injection (builder/cms/routes-inject.js) — 4 patterns only, constant size
-11. SEO module (cms/seo.js)
-12. Sitemap + RSS + robots.txt (cms/feed.js)
+5.  Meta reader + validator (src/cms/meta.js) — reads meta.json via FS.load, validates required fields
+6.  Markdown → HTML converter (src/cms/markdown.js) — reads body .md, no fence splitting
+7.  build:cms pipeline (src/builder/cms.js + src/builder/pipeline.js)
+8.  Hash generation + errors.log (src/builder/errors.js)
+9.  Content index + manifest.json (src/cms/index.js)
+10. Route injection (src/builder/routes-inject.js) — 4 patterns only, constant size
+11. SEO module (src/cms/seo.js)
+12. Sitemap + RSS + robots.txt (src/cms/feed.js)
 13. Verify: build/ output matches contract in SCOPE.md
 14. Assert: grep emitted HTML for <script without defer/async/type="module" → fail build if found
 15. <cms-list> Web Component (light DOM, no attachShadow)
 16. <cms-page> Web Component (light DOM, named AdSense slots)
-17. AdSense slot wiring from cms/config.yaml
+17. AdSense slot wiring from src/cms/config.yaml
 18. Integration test: AI writes meta.json + en.md → moves to published/ → build → browser renders → AdSense shows
 ```
 

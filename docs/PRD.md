@@ -109,7 +109,7 @@ Akao CMS is built on top of the **akao shop project** by deleting all eCommerce/
 | FR-2.1 | `npm run build:cms` → `build/{locale}/{category}/{slug}/index.html` + `build/manifest.json` + `build/index.json`                                                                                           |
 | FR-2.2 | SHA-256 hash for every HTML output; `index.hash` written alongside — feeds DB.js offline cache contract.                                                                                                   |
 | FR-2.3 | Incremental build — `build/manifest.json` stores `{ slug: contentHash }`; only changed files rebuilt. Hash diff, not mtime.                                                                                |
-| FR-2.4 | Config-driven locale activation — `cms/config.yaml` `active: [en]`; adding locale = config change + rebuild, zero code changes.                                                                            |
+| FR-2.4 | Config-driven locale activation — `src/cms/config.yaml` `active: [en]`; adding locale = config change + rebuild, zero code changes.                                                                      |
 | FR-2.5 | Config-driven categories — adding category = config change + rebuild, zero code changes.                                                                                                                   |
 | FR-2.6 | 18-locale infrastructure — pipeline supports all 18 locales; only `active` ones are built.                                                                                                                 |
 | FR-2.7 | `archived/` articles — build emits a redirect stub at `build/{path}/index.html` so archived URLs never return 404.                                                                                         |
@@ -202,7 +202,7 @@ Enforced by build pipeline — no human intervention needed.
 ### UJ-2 — Operator adds a new category
 
 ```text
-1. Edit cms/config.yaml: add "technology" to categories list
+1. Edit src/cms/config.yaml: add "technology" to categories list
 2. Run: npm run build:cms
 3. /{locale}/technology/ listing route generated automatically
 4. AI can now write articles with category: technology
@@ -212,7 +212,7 @@ Enforced by build pipeline — no human intervention needed.
 ### UJ-3 — Operator activates a new locale
 
 ```text
-1. Edit cms/config.yaml: add "es" to active locales
+1. Edit src/cms/config.yaml: add "es" to active locales
 2. Run: npm run build:cms
 3. /es/{category}/{slug}/ routes generated for all content with lang: es
 4. Spanish sitemap.xml generated automatically
@@ -274,7 +274,7 @@ Enforced by build pipeline — no human intervention needed.
 - Native Web Components, light DOM only — no `attachShadow` on `cms-page` or `cms-list`
 - Leading `/` import paths for browser modules (`/core/DB.js`)
 - `build/` directory never edited manually — always regenerated
-- Single config source: `cms/config.yaml`
+- Single config source: `src/cms/config.yaml`
 - No npm packages at any layer — zero dependencies
 - Node.js 18+ for build; modern browsers for runtime
 
@@ -286,7 +286,7 @@ Enforced by build pipeline — no human intervention needed.
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Locales                | 18-locale infrastructure, config-driven. Launch: `en` only                                                                                                                                       |
 | Project structure      | In-place refactor of akao shop — not a new project                                                                                                                                               |
-| Categories             | Config-driven via `cms/config.yaml` — never hardcoded                                                                                                                                            |
+| Categories             | Config-driven via `src/cms/config.yaml` — never hardcoded                                                                                                                                        |
 | Deploy target          | Deferred — local-first first; build designed config-driven for easy swap                                                                                                                         |
 | Dependencies           | Zero — not even devDependencies; all parsers inline                                                                                                                                              |
 | Admin UI               | Phase 2; logic-first approach                                                                                                                                                                    |
@@ -302,7 +302,7 @@ Enforced by build pipeline — no human intervention needed.
 ## Config Schema — Locked
 
 ```yaml
-# cms/config.yaml
+# src/cms/config.yaml
 
 locales:
   active: [en]

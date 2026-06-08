@@ -32,7 +32,7 @@ Akao CMS converts Markdown files into fully rendered, multilingual, SEO-ready we
 1. **Zero dependencies** — no npm packages at runtime, build time, or devDependencies. Every parser written inline.
 2. **No Shadow DOM** on `<cms-page>` or `<cms-list>` — AdSense requires light DOM.
 3. **Hybrid routing** — build emits complete HTML files; `<cms-page>` is progressive enhancement only.
-4. **Config-driven** — locales and categories changed in `cms/config.yaml`, never in code.
+4. **Config-driven** — locales and categories changed in `src/cms/config.yaml`, never in code.
 5. **Incremental build** — SHA-256 hash diff via `build/manifest.json`; never a full rebuild unless necessary.
 
 ---
@@ -94,7 +94,7 @@ Output lands in `build/`. Never edit `build/` manually — always regenerated.
 
 ## Configuration
 
-All configuration lives in `cms/config.yaml`:
+All configuration lives in `src/cms/config.yaml`:
 
 ```yaml
 locales:

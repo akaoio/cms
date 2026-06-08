@@ -133,7 +133,7 @@
 
 ### Story 1.4 — Build Pipeline Entry + Quality Gate + Error Reporting
 
-**Files:** `builder/cms.js`, `builder/cms/pipeline.js`, `builder/cms/errors.js`
+**Files:** `src/builder/cms.js`, `src/builder/pipeline.js`, `src/builder/errors.js`
 
 **DoD:**
 
@@ -152,7 +152,7 @@
 
 ### Story 1.5 — Hash Generation + Incremental Build
 
-**Files:** `src/cms/index.js` (hash diff logic), `builder/cms/pipeline.js`
+**Files:** `src/cms/index.js` (hash diff logic), `src/builder/pipeline.js`
 
 **DoD:**
 
@@ -179,7 +179,7 @@
 
 ### Story 1.7 — Route Registration (Pattern-Based) ⚠️ REWRITTEN
 
-**File:** `builder/cms/routes-inject.js`
+**File:** `src/builder/routes-inject.js`
 **Boss revise R4:** Per-article injection = 50MB at 330K articles. Pattern-based instead — constant size forever.
 
 **DoD:**
@@ -202,7 +202,7 @@
 
 ### Story 1.8 — SEO Module + GA4 Injection
 
-**File:** `src/cms/seo.js`, `builder/cms/render.js`
+**File:** `src/cms/seo.js`, `src/builder/render.js`
 
 **DoD:**
 
@@ -232,7 +232,7 @@
 
 ### Story 1.10 — index.json Pagination *(trigger-based — implement when count > 5K)*
 
-**File:** `src/cms/index.js`, `builder/cms/pipeline.js`
+**File:** `src/cms/index.js`, `src/builder/pipeline.js`
 **Boss revise R3:** 330K articles × 200 bytes = 66MB browser download. Must paginate before scale.
 
 **Trigger:** Implement this story when total article count exceeds 5,000 (50% buffer before 10K danger threshold).

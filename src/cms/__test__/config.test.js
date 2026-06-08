@@ -3,7 +3,7 @@ import { test } from "node:test"
 import assert from "node:assert"
 import { loadConfig } from "../config.js"
 
-const FIXTURES = ["cms", "__test__", "fixtures", "config"]
+const FIXTURES = ["src", "cms", "__test__", "fixtures", "config"]
 const fixture = (name) => [...FIXTURES, name]
 
 test("config", async (t) => {

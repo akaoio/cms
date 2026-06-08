@@ -24,7 +24,7 @@ Pipeline hiện tại dừng ở `npm run build:cms → build/`. Không có bư�
 **Phase 1 (hiện tại → 3 tháng):** Netlify semi-auto
 
 ```js
-// builder/cms.js — sau build hoàn thành
+// src/builder/cms.js — sau build hoàn thành
 if (process.env.NETLIFY_AUTH_TOKEN && process.env.NETLIFY_SITE_ID) {
     await exec("netlify deploy --dir=build --prod")
 }

@@ -45,7 +45,7 @@ SEO description ≠ Facebook caption — hai format khác nhau hoàn toàn.
 
 **Fix (2 dòng):**
 ```yaml
-# cms/config.yaml
+# src/cms/config.yaml
 site:
   default_og_image: https://example.com/default-og.jpg
 ```

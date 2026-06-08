@@ -32,7 +32,7 @@
 1. **Zero dependencies** — no npm packages at any layer. All parsers written inline.
 2. **No `attachShadow`** on `cms-page` or `cms-list` — AdSense requires light DOM.
 3. **Hybrid routing** — build emits complete HTML files. `cms-page` is progressive enhancement only.
-4. **Config-driven** — locales and categories changed in `cms/config.yaml`, never in code.
+4. **Config-driven** — locales and categories changed in `src/cms/config.yaml`, never in code.
 5. **Incremental build** — hash diff via `build/manifest.json`, never full rebuild unless necessary.
 
 ---
