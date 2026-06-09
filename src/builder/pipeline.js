@@ -51,7 +51,7 @@ export async function runPipeline() {
                     const contentHash = await sha256(metaYamlText + mdText)
                     
                     // Incremental check: Skip if hash matches old manifest
-                    if (oldManifest && oldManifest.entries[articleId]?.hash === contentHash) {
+                    if (oldManifest?.entries?.[articleId]?.hash === contentHash) {
                         newEntries[articleId] = oldManifest.entries[articleId]
                         unchanged++
                         continue

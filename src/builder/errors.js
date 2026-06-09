@@ -14,10 +14,12 @@ export async function appendError(data) {
         
         let existing = ''
         if (await FS.exist(logPath)) {
-            existing = await FS.load(logPath)
+            const raw = await FS.load(logPath)
+            existing = raw instanceof Uint8Array ? new TextDecoder().decode(raw) : String(raw)
         }
         
-        await FS.write(logPath, existing + entry + '\n')
+        const output = existing + entry + '\n'
+        await FS.write(logPath, output)
     } catch (err) {
         console.error('CRITICAL: Failed to write to errors.log', err)
     }
