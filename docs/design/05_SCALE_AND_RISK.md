@@ -66,7 +66,7 @@ Bằng: build/index/{locale}/{category}/page-N.json (20 articles/page = 4KB)
 
 ```json
 // Thay per-article entries bằng pattern-based:
-{ "pattern": "/{locale}/{category}/{slug}/", "component": "cms-page" }
+{ "pattern": "/{date}/{cat1}/{cat2}/{slug}/{locale}/", "component": "cms-page" }
 ```
 
 routes.json size stays constant dù 330K articles.

@@ -2,7 +2,7 @@
 import { test } from "node:test"
 import assert from "node:assert"
 import { FS } from "../../core/FS.js"
-import { parseMarkdown } from "../markdown.js"
+import { parseMarkdown, extractFrontmatter } from "../markdown.js"
 
 const FIXTURES = ["src", "cms", "__test__", "fixtures"]
 const dir = (...parts) => [...FIXTURES, ...parts]
@@ -21,6 +21,48 @@ test("markdown — body loader", async (t) => {
         const body = await FS.load(dir("published", "2026", "06", "01", "00", "06", "en.md"))
 
         assert.strictEqual(body.startsWith("# A Short Note"), true)
+    })
+})
+
+test("markdown — frontmatter", async (t) => {
+    await t.test("extractFrontmatter — returns null meta when no fence present", () => {
+        const { meta, body } = extractFrontmatter("# Hello\n\nWorld")
+
+        assert.strictEqual(meta, null)
+        assert.strictEqual(body, "# Hello\n\nWorld")
+    })
+
+    await t.test("extractFrontmatter — parses YAML block and returns body without fence", () => {
+        const input = "---\ntitle: My Post\ndate: 2026-06-08\n---\n\n# Body\n"
+        const { meta, body } = extractFrontmatter(input)
+
+        assert.strictEqual(meta.title, "My Post")
+        assert.strictEqual(meta.date, "2026-06-08")
+        assert.match(body, /# Body/)
+        assert.strictEqual(body.includes("---"), false)
+    })
+
+    await t.test("extractFrontmatter — parses block array tags in frontmatter", () => {
+        const input = "---\ntitle: Tagged\ntags:\n  - ssg\n  - cms\n---\n\nBody here\n"
+        const { meta } = extractFrontmatter(input)
+
+        assert.deepStrictEqual(meta.tags, ["ssg", "cms"])
+    })
+
+    await t.test("extractFrontmatter — returns null meta when opening fence but no closing fence", () => {
+        const { meta, body } = extractFrontmatter("---\ntitle: Oops\n")
+
+        assert.strictEqual(meta, null)
+        assert.strictEqual(body, "---\ntitle: Oops\n")
+    })
+
+    await t.test("parseMarkdown — strips frontmatter and converts body only", () => {
+        const input = "---\ntitle: Strip Me\n---\n\n# Real Heading\n\nParagraph text.\n"
+        const html = parseMarkdown(input)
+
+        assert.match(html, /<h1>Real Heading<\/h1>/)
+        assert.doesNotMatch(html, /Strip Me/)
+        assert.doesNotMatch(html, /---/)
     })
 })
 

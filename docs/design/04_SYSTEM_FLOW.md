@@ -57,14 +57,14 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
 2. AI generates article content (title, body, meta description, image URL)
 3. AI writes:
    - content/posts/published/YYYY/MM/DD/XX/YY/<locale>.md  ← body only, no frontmatter
-   - content/posts/published/YYYY/MM/DD/XX/YY/meta.json    ← metadata (title, slug, date, category, ...)
+   - content/posts/published/YYYY/MM/DD/XX/YY/meta.yaml    ← metadata (title, slug, date, category, ...)
 4. AI runs: npm run build:cms
-   → read meta.json + Markdown body (no frontmatter parsing)
+   → read meta.yaml + Markdown body (with optional frontmatter parsing)
    → generate HTML + .hash files
    → update build/manifest.json (incremental diff)
    → update sitemap.xml + rss.xml
    → write build/errors.log (any failed files)
-5. Static HTML live at /[locale]/[category]/[slug]/
+5. Static HTML live at /{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/
 6. AI calls Social MCP: post(url, teaser_text) → 10+ FB pages
 7. Facebook distributes organically
 8. User clicks → CMS page → AdSense loads → impression recorded → $$$
@@ -84,6 +84,7 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
 | RSS feed                                    | AI Agent uses as content source                    | ❗ Critical |
 | Meta title/description                      | Organic Google traffic                             | 🔥 High     |
 | Incremental build                           | Scale to 330K+ pages without slowdown              | 🔥 High     |
+| YAML/Frontmatter support                    | Easier for AI/Writers to manage metadata            | ✅ New      |
 
 ---
 

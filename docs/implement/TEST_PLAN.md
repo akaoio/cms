@@ -60,7 +60,7 @@
 
 - [x] **B2 — Fixtures cơ bản**
   Story: 1.0 · Vị trí: `src/cms/__test__/fixtures/`
-  Đã tạo 7 fixtures đúng layout STORIES.md/FAN_OUT.md: `published/.../01` (happy path, ~690 từ, đủ mọi optional field + mọi markdown element type cho B5 tái dùng), `draft/.../02` (loại trừ), `published/.../03` (thiếu `title` → MISSING_FIELD), `published/.../04` (title `"Barça: el partido"`), `published/.../05` (category Unicode `công-nghệ`), `published/.../06` (thin content ~98 từ, không kèm `meta.json` theo đúng diagram), `published/.../07` (`publish_at: 2099-01-01` → skip)
+  Đã tạo 7 fixtures đúng layout STORIES.md/FAN_OUT.md: `published/.../01` (happy path, ~690 từ, đủ mọi optional field + mọi markdown element type cho B5 tái dùng), `draft/.../02` (loại trừ), `published/.../03` (thiếu `title` → MISSING_FIELD), `published/.../04` (title `"Barça: el partido"`), `published/.../05` (category Unicode `công-nghệ`), `published/.../06` (thin content ~98 từ, không kèm `meta.yaml` theo đúng diagram), `published/.../07` (`publish_at: 2099-01-01` → skip)
 
 - [x] **B3 — Meta reader test**
   Story: 1.1 · File: `src/cms/__test__/meta.test.js`
@@ -108,13 +108,41 @@
   Story: 1.7 · Module: `routes-inject.js`
   Việc cần làm: test `routes.json` luôn đúng 4 pattern entries, kích thước không đổi qua nhiều lần build (idempotent), không bao giờ inject per-article path
 
+- [x] **C7 — Page renderer test** *(missing từ đầu — thêm sau khi nhận ra thiếu contract)*
+  Story: 2.6 · File: `src/builder/__test__/render.test.js`
+  Module: `src/builder/render.js`
+  Interface: `renderPage(meta, bodyHtml, seoHtml, config, siblingLocales?) → string`
+  - `meta` — output của `readMeta(dir, locale)` (merged meta.yaml + locale frontmatter)
+  - `bodyHtml` — output của `parseMarkdown()` (rendered article body)
+  - `seoHtml` — output của `generateSEO()` (OG + JSON-LD + GA4 block, goes in `<head>`)
+  - `siblingLocales` — `[{ locale, url }]` for hreflang links (en → x-default)
+  Đã viết 14 case test (15/15 GREEN):
+  - DOCTYPE + `<html lang="{meta.lang}">` attribute
+  - `<title>` = `{meta.title} | {config.site.title}`
+  - `seoHtml` injected inside `<head>` (position check: before `</head>`)
+  - hreflang links cho từng sibling locale
+  - `hreflang="x-default"` trỏ vào locale `"en"`
+  - AdSense loader `<script async>` trong `<head>` với `ca-pub-...`
+  - External scripts (có `src`) đều dùng `defer`/`async`/`type="module"` (không blocking)
+  - 3 `<ins class="adsbygoogle">` slots: `#ad-top`, `#ad-mid`, `#ad-bottom`
+  - Cả 3 slot mang `data-ad-client="ca-pub-..."` (3 occurrences)
+  - `<article>` bao bọc body content
+  - `#ad-mid` nằm BÊN TRONG `<article>` (split tại `</h2>`)
+  - `#ad-top` TRƯỚC `<article>`, `#ad-bottom` SAU `</article>`
+  - Không có `siblingLocales` → không emit hreflang (graceful)
+  - Body không có `<h2>` → vẫn hoạt động bình thường
+  **Contract ranh giới rõ:**
+  - `seo.js` (kernel) → tạo SEO block (OG + JSON-LD + GA4) → string
+  - `render.js` (builder) → nhận SEO block từ ngoài, ghép vào `<head>` → full HTML page
+  - KHÔNG overlap: render.js KHÔNG tự tạo OG tags; seo.js KHÔNG quan tâm HTML structure
+
 ---
 
 ## Phần D — Test cho SEO/Feed modules
 
-- [ ] **D1 — SEO tag test**
+- [x] **D1 — SEO tag test**
   Story: 1.8 · File: `src/cms/__test__/seo.test.js`
-  Việc cần làm: test đủ 5 OG tags, fallback chain `og:image` (`meta.image || config.site.default_og_image || ""`), fallback `fb_caption || description[:160]`, JSON-LD Article schema, `dateModified = updated_at || date`, GA4 script injection khi config có `ga4_measurement_id`
+  10 case test `generateSEO()`: đủ 5 OG tags, fallback chain `og:image`, fallback `fb_caption || description[:160]`, JSON-LD Article schema, `dateModified = updated_at || date`, GA4 script injection present/absent
 
 - [ ] **D2 — Feed generator test**
   Story: 1.9 · File: `src/cms/__test__/feed.test.js`
@@ -134,7 +162,7 @@
 
 - [ ] **E3 — Integration test**
   Story: 3.1 · File: `src/cms/__test__/integration.js`
-  Việc cần làm: test end-to-end — ghi `meta.json + en.md` vào `published/` → chạy `build:cms` → assert HTML tồn tại, OG tags đúng, hash tồn tại, sitemap có URL, `errors.log` rỗng với content hợp lệ
+  Việc cần làm: test end-to-end — ghi `meta.yaml + en.md` vào `published/` → chạy `build:cms` → assert HTML tồn tại, OG tags đúng, hash tồn tại, sitemap có URL, `errors.log` rỗng với content hợp lệ
 
 - [ ] **E4 — Compliance verifier update**
   Story: 3.2 · File: `akao-skill/scripts/verify.js`

@@ -1,0 +1,29 @@
+# src/cms/config.yaml
+
+locales:
+  active: [en, vi]
+  available: [en, vi, es, fr, de, ja, ko, ru, ar, hi, pt, it, th, he, ur, zh, zh-TW, no]
+
+categories:
+  - sports
+  - entertainment
+  - technology
+
+adsense:
+  publisher_id: ca-pub-XXXXXXXXXXXXXXXX
+  slots:
+    top: XXXXXXXXXX
+    mid: XXXXXXXXXX
+    bottom: XXXXXXXXXX
+
+site:
+  title: Akao CMS
+  url: http://localhost:3000
+  description: A zero-dependency static site generator
+  default_og_image: /img/default-og.jpg
+
+analytics:
+  ga4_measurement_id: G-XXXXXXXXXX
+
+quality_gate:
+  min_word_count: 600

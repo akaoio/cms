@@ -1,5 +1,6 @@
 import { BROWSER, driver, isBinary } from "./shared.js"
 import { join } from "./join.js"
+import { parse as parseYAML } from "../YAML.js"
 
 /**
  * Load content from files or directories (JSON or plain text).
@@ -57,6 +58,8 @@ export async function load(path, options = {}) {
         const ext = _path.match(/\.\w+$/)?.[0]?.slice(1).toLowerCase() || ""
         if (ext === "json")
             try { return JSON.parse(text) } catch { return text }
+        if (ext === "yaml" || ext === "yml")
+            try { return parseYAML(text) } catch { return text }
 
         return text
     }

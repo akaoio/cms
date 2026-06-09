@@ -1,6 +1,6 @@
 # Architecture — Akao CMS
 
-**Status:** ✅ Updated — 2026-06-08 (kernel + builder relocated to `src/cms/` and `src/builder/` — see ADR-001; config format confirmed as JSON)  
+**Status:** ✅ Updated — 2026-06-08 (kernel + builder relocated to `src/cms/` and `src/builder/` — see ADR-001; metadata migrated to YAML — see ADR-007 rev)  
 **Full document:** `_bmad-output/planning-artifacts/architecture.md`
 
 ---
@@ -16,7 +16,7 @@ akao-cms/
 │   │   └── archived/YYYY/MM/DD/XX/YY/  ← redirect stubs; URL never 404s
 │   └── pages/YYYY/MM/DD/XX/YY/
 │       ├── en.md
-│       └── meta.json
+│       └── meta.yaml
 │
 ├── src/
 │   ├── cms/                          ← kernel: isomorphic, zero env calls (ADR-001)
@@ -24,8 +24,8 @@ akao-cms/
 │   │   ├── config.json               ← site config (locales, categories, adsense, quality_gate)
 │   │   ├── feed.js                   ← emits sitemap.xml, rss.xml, robots.txt
 │   │   ├── index.js                  ← builds manifest.json, drives incremental logic
-│   │   ├── markdown.js               ← Markdown → HTML, no frontmatter fence
-│   │   ├── meta.js                   ← reads + validates meta.json
+│   │   ├── markdown.js               ← Markdown → HTML; strips optional frontmatter fence
+│   │   ├── meta.js                   ← reads meta.yaml + optional locale frontmatter
 │   │   ├── seo.js                    ← generates <meta>, OG, JSON-LD per page
 │   │   └── __test__/
 │   │       └── fixtures/
@@ -56,10 +56,11 @@ akao-cms/
 │       ├── components/
 │       │   ├── cms-list/index.js     ← category/tag listing, pagination
 │       │   └── cms-page/index.js     ← renders article HTML, AdSense slots
-│       └── routes/
-│           ├── article/[locale]/[category]/[slug]/
-│           ├── category/[category]/
-│           └── tag/[tag]/
+└── routes/
+    ├── {date}/{cat1}/{cat2}/{slug}/{locale}/
+    ├── {date}/{cat1}/{cat2}/
+    └── {date}/{cat1}/
+
 │
 └── build/                            ← generated output (not committed to git)
     ├── {locale}/{category}/{slug}/
@@ -114,29 +115,29 @@ These modules come from the akao codebase and are kept unchanged. All new CMS co
 ```
 content/posts/
   ├── draft/YYYY/MM/DD/XX/YY/         (AI writes drafts here — never scanned by build)
-  │     ├── en.md                     (body only, no frontmatter fence)
-  │     └── meta.json                 (title, slug, date, category, tags, ...)
+  │     ├── en.md                     (optional frontmatter + body)
+  │     └── meta.yaml                 (shared metadata: date, category, slug, tags, ...)
   └── published/YYYY/MM/DD/XX/YY/     (AI moves here to publish — only this tree is built)
-        ├── en.md
+        ├── en.md                     (optional frontmatter: title, description, lang)
         ├── vi.md
-        └── meta.json
+        └── meta.yaml
 content/pages/YYYY/MM/DD/XX/YY/
   ├── en.md
-  └── meta.json
+  └── meta.yaml
         │
         ▼
 src/builder/ingest.js       (recursively scans published/** only; draft/ never touched)
         │
         ▼
-src/cms/meta.js         (reads meta.json via FS.load → JSON.parse, validates required fields)
-src/cms/markdown.js     (reads <locale>.md body, converts to HTML)
+src/cms/meta.js         (reads meta.yaml; merges optional locale frontmatter from <locale>.md)
+src/cms/markdown.js     (strips frontmatter if present; converts body Markdown → HTML)
         │
         ▼
-src/builder/render.js       (assembles full HTML page + SEO tags)
-src/cms/seo.js          (generates <meta>, OG, JSON-LD)
+src/builder/render.js       (renderPage(meta, bodyHtml, seoHtml, config, siblings) → full HTML)
+src/cms/seo.js          (generateSEO(meta, config, url) → OG + JSON-LD + GA4 block)
         │
         ▼
-build/{locale}/{cat}/{slug}/
+build/YYYYMMDD/{cat1}/{cat2}/{slug}/{locale}/   ← ✅ URL format confirmed (Huy 2026-06-08)
   ├── index.html            (complete pre-rendered HTML — content already in DOM, no JS needed)
   └── index.hash            (SHA-256 of HTML)
         │
@@ -234,7 +235,7 @@ content/posts/draft/     ← AI writes here; never scanned by build
 content/posts/published/ ← ingest.js recurses here only
 content/posts/archived/  ← redirect stubs generated; URL never 404s
 ```
-No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recurse into `published/`**.
+No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recurse into `published/`**.
 
 **Why:** Folder position is a hard structural guard — no code can accidentally publish a draft by ignoring a flag. With thousands of articles/day, a soft textual guard (`status: draft` in a file) creates unavoidable co-mingling of states in the same tree. The factory-model makes state unambiguous to both tools and humans.
 
@@ -244,13 +245,19 @@ No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recur
 
 ---
 
-### ADR-007: Article Metadata — JSON over YAML
+### ADR-007: Article Metadata — YAML (revised 2026-06-08)
 
-**Decision:** Article metadata lives in `meta.json` (not YAML frontmatter). Body `.md` files contain the article body only — no `---` fence.
+**Decision:** Article metadata lives in `meta.yaml`. Body `.md` files contain optional frontmatter + body — frontmatter uses the same YAML format as `meta.yaml`.
 
-**Why:** NFR-1 (zero dependencies) and the boss's feedback converge on the same answer. A custom ~100-line YAML parser fails at scale: multiline strings, Unicode, nested structures, boolean coercion (`yes`/`no`), and error location reporting are all missing. A standard YAML library violates NFR-1. JSON is parsed by `JSON.parse()` — V8-native, zero deps, throws with position on malformed input, handles all Unicode. `FS.js` already auto-parses `.json` files, so no new code is needed.
+- `meta.yaml` — shared across all locales: `date`, `category`, `slug`, `tags`, `image`, `publish_at`, `updated_at`
+- `<locale>.md` frontmatter (optional) — locale-specific overrides: `title`, `description`, `lang`, `fb_caption`
+- If `<locale>.md` has no frontmatter, all metadata comes from `meta.yaml`
+- `extractFrontmatter(text)` in `src/cms/markdown.js` handles the optional parse
+- `readMeta(dir, locale?)` in `src/cms/meta.js` merges both sources (frontmatter overrides `meta.yaml`)
 
-**Rejected:** Custom inline YAML parser — too limited at scale. Standard YAML npm package — violates NFR-1.
+**Why:** Boss confirmed YAML is preferred for human-written files ("gần gũi với người, cho phép viết comment"). A minimal flat YAML parser (~60 lines) covering the meta subset is sufficient and zero-dep. JSON is still used for machine-generated output (`manifest.json`, `index.json`, `routes.json`).
+
+**Rejected (original):** `meta.json` — JSON doesn't allow comments, harder for writers to read/edit. Standard YAML library — violates NFR-1.
 
 ---
 
@@ -286,14 +293,14 @@ No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recur
 
 | File          | Owns                                                                                                                     | FRs                    |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
-| `meta.js`     | Reads `meta.json` via `FS.load()` (auto-parses JSON), validates required fields, returns meta object or structured error | FR-1.1, FR-1.3, FR-1.6 |
-| `markdown.js` | Reads `<locale>.md` body (no frontmatter fence), converts Markdown → HTML, ~150–180 lines                                | FR-1.2                 |
+| `meta.js`     | `readMeta(dir, locale?)` — reads `meta.yaml`, merges optional locale frontmatter, validates required fields              | FR-1.1, FR-1.3, FR-1.6 |
+| `markdown.js` | `extractFrontmatter(text)` + `parseMarkdown(text)` — strips optional frontmatter, converts body Markdown → HTML          | FR-1.2                 |
 | `config.js`   | Loads + validates `src/cms/config.yaml`, exposes frozen `{ locales, categories, adsense, site }`                         | FR-2.4, FR-2.5         |
 | `index.js`    | Builds content index, emits `build/manifest.json` (ADR-002), drives hash-diff incremental logic                          | FR-2.2, FR-2.3, FR-2.6 |
 | `seo.js`      | Generates `<meta>`, OG tags, canonical, JSON-LD Article schema per page                                                  | FR-4.1, FR-4.2, FR-4.3 |
 | `feed.js`     | Emits `build/sitemap.xml`, `build/rss.xml`, `build/robots.txt`                                                           | FR-4.4, FR-4.5, FR-4.6 |
 
-**Removed:** `yaml.js` (custom inline YAML parser) — eliminated; `FS.js` auto-parses `.json` natively via `JSON.parse()`, no custom parser needed. `frontmatter.js` — eliminated; metadata and body are now separate files, no fence splitting required.
+**Added:** `src/core/YAML.js` — minimal flat YAML parser (~60 lines, zero deps) covering the `meta.yaml` subset. `extractFrontmatter()` in `markdown.js` handles optional frontmatter stripping from `.md` files.
 
 ### `src/builder/` — Build orchestration (Node.js only)
 
@@ -302,7 +309,7 @@ No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recur
 | `cms.js`           | CLI entry point — `npm run build:cms`                                                                                                               | FR-2.1          |
 | `ingest.js`        | Recursively scans `content/posts/published/**` + `content/pages/**` only; `draft/` and `archived/` are never touched; draft exclusion is structural | FR-1.4, FR-1.5  |
 | `pipeline.js`      | Drives full build loop: ingest → index → render → routes → feed                                                                                     | FR-2.1          |
-| `render.js`        | Assembles HTML per article per locale, writes to `build/{locale}/{category}/{slug}/index.html`                                                      | FR-2.6, FR-3.1  |
+| `render.js`        | `renderPage(meta, bodyHtml, seoHtml, config, siblings)` → full HTML; output path: `YYYYMMDD/{cat1}/{cat2}/{slug}/{locale}/index.html`               | FR-2.6, FR-3.1  |
 | `routes-inject.js` | Appends article/category/tag/page routes to Router manifest                                                                                         | FR-3.1–3.5      |
 | `errors.js`        | Appends `{ ts, file, error }` to `build/errors.log` — never throws                                                                                  | FR-1.4, ADR-004 |
 
@@ -315,12 +322,15 @@ No `status:` or `draft:` field in `meta.json`. Build pipeline rule: **only recur
 
 ### `src/UI/routes/` — New routes
 
-| Path                                  | URL Pattern              |
-| ------------------------------------- | ------------------------ |
-| `article/[locale]/[category]/[slug]/` | `/en/sports/my-article/` |
-| `category/[category]/`                | `/en/sports/`            |
-| `tag/[tag]/`                          | `/en/tag/football/`      |
-| `page/[slug]/`                        | `/en/about/`             |
+URL format confirmed: `/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/`
+
+| Path | URL Example |
+| ---- | ----------- |
+| `/{date}/{cat1}/{cat2}/{slug}/{locale}/` | `/20260630/sport/worldcup/my-article/en/` |
+| `/{date}/{cat1}/{cat2}/` | `/20260630/sport/worldcup/` |
+| `/{date}/{cat1}/` | `/20260630/sport/` |
+
+**⚠️ Router.js impact:** Router hiện tại parse locale ở segment đầu (`/en/sports/...`). Format mới có locale ở segment cuối — cần cập nhật `Router.js` và `routes.json` patterns.
 
 **⚠️ routes.json — Pattern-based only (boss revise R4)**
 
@@ -419,24 +429,25 @@ Write fixtures before writing any parser. New structure mirrors the factory-mode
 src/cms/__test__/fixtures/
 ├── published/
 │   └── 2026/06/01/00/01/
-│       ├── en.md                ← valid article body (no frontmatter fence)
-│       └── meta.json            ← valid meta (title, date, category, description all present)
+│       ├── en.md                ← body only (no frontmatter) — title comes from meta.yaml
+│       ├── vi.md                ← optional frontmatter: title/description/lang in Vietnamese
+│       └── meta.yaml            ← shared meta: date, category, slug, tags, image, publish_at
 ├── draft/
 │   └── 2026/06/01/00/02/
 │       ├── en.md
-│       └── meta.json            ← draft article (must NOT appear in build output)
+│       └── meta.yaml            ← draft article (must NOT appear in build output)
 ├── published/
 │   └── 2026/06/01/00/03/
 │       ├── en.md
-│       └── meta.json            ← missing "title" field → should fail validation
+│       └── meta.yaml            ← missing "title" field → should fail validation
 ├── colon-in-title/
-│   └── meta.json                ← { "title": "Barça: el partido" } — JSON handles this natively
+│   └── meta.yaml                ← title: "Barça: el partido" — quoted string in YAML
 ├── unicode/
-│   └── meta.json                ← category with Unicode characters
+│   └── meta.yaml                ← category with Unicode characters
 ├── thin-content/
 │   └── en.md                    ← < 300 words → THIN_CONTENT error
 └── future-publish/
-    └── meta.json                ← publish_at = future date → SKIP silently
+    └── meta.yaml                ← publish_at: future date → SKIP silently
 ```
 
 Use plain `assert.deepStrictEqual` — no test framework, zero deps.
@@ -543,9 +554,14 @@ build/
 ├── sitemap.xml
 ├── rss.xml
 ├── robots.txt
-└── {locale}/
-    └── {category}/
-        └── {slug}/
-            ├── index.html ← complete pre-rendered HTML + AdSense slots
-            └── index.hash ← SHA-256 of HTML
+└── {YYYYMMDD}/
+    └── {cat1}/
+        └── {cat2}/
+            └── {slug}/
+                └── {locale}/
+                    ├── index.html ← complete pre-rendered HTML + AdSense slots
+                    └── index.hash ← SHA-256 of HTML
 ```
+
+URL ví dụ: `/20260630/sport/worldcup/asdf-qwer-zxcv/en/index.html`
+p/asdf-qwer-zxcv/en/index.html`

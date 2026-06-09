@@ -14,13 +14,14 @@ test("meta", async (t) => {
         assert.strictEqual(meta.title, "How Static Site Generators Are Reshaping Modern Publishing")
         assert.strictEqual(meta.date, "2026-06-01T00:00:00.000Z")
         assert.strictEqual(meta.category, "technology")
+        assert.strictEqual(meta.subcategory, "general")
     })
 
     await t.test("readMeta — passes optional fields through untouched", async () => {
         const articleDir = dir("published", "2026", "06", "01", "00", "01")
         const meta = await readMeta(articleDir)
 
-        assert.strictEqual(meta.slug, "static-site-generators-modern-publishing")
+        assert.strictEqual(meta.slug, "20260601-static-site-generators-modern-publishing")
         assert.deepStrictEqual(meta.tags, ["ssg", "publishing", "performance"])
         assert.strictEqual(meta.description, "A look at why static site generators are winning back the web from heavyweight CMS platforms.")
         assert.strictEqual(meta.image, "https://example.com/images/ssg-cover.jpg")
@@ -73,5 +74,30 @@ test("meta", async (t) => {
 
         assert.strictEqual(meta.publish_at, "2099-01-01T00:00:00.000Z")
         assert.strictEqual(meta.title, "Scheduled for the Future")
+    })
+
+    await t.test("readMeta — with locale merges frontmatter title over meta.yaml", async () => {
+        const articleDir = dir("published", "2026", "06", "01", "00", "01")
+        const meta = await readMeta(articleDir, "vi")
+
+        assert.strictEqual(meta.title, "Máy phát tĩnh đang định hình lại xuất bản hiện đại")
+        assert.strictEqual(meta.lang, "vi")
+    })
+
+    await t.test("readMeta — with locale, non-overridden fields still come from meta.yaml", async () => {
+        const articleDir = dir("published", "2026", "06", "01", "00", "01")
+        const meta = await readMeta(articleDir, "vi")
+
+        assert.strictEqual(meta.category, "technology")
+        assert.strictEqual(meta.slug, "20260601-static-site-generators-modern-publishing")
+        assert.deepStrictEqual(meta.tags, ["ssg", "publishing", "performance"])
+    })
+
+    await t.test("readMeta — with locale that has no frontmatter returns meta.yaml fields unchanged", async () => {
+        const articleDir = dir("published", "2026", "06", "01", "00", "01")
+        const meta = await readMeta(articleDir, "en")
+
+        assert.strictEqual(meta.title, "How Static Site Generators Are Reshaping Modern Publishing")
+        assert.strictEqual(meta.lang, "en")
     })
 })
