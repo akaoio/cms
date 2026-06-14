@@ -60,25 +60,39 @@
 
 - [x] **B2 — Fixtures cơ bản**
   Story: 1.0 · Vị trí: `src/cms/__test__/fixtures/`
-  Đã tạo 7 fixtures đúng layout STORIES.md/FAN_OUT.md: `staged/.../01` (happy path, ~690 từ, đủ mọi optional field + mọi markdown element type cho B5 tái dùng), `draft/.../02` (loại trừ), `staged/.../03` (thiếu `title` → MISSING_FIELD), `staged/.../04` (title `"Barça: el partido"`), `staged/.../05` (category Unicode `công-nghệ`), `staged/.../06` (thin content ~98 từ, không kèm `meta.yaml` theo đúng diagram), `staged/.../07` (`publish_at: 2099-01-01` → skip)
+  Đã tạo 7 fixtures đúng layout STORIES.md/FAN_OUT.md: `staged/.../00/01` (happy path, ~750 từ, đủ mọi optional field + mọi markdown element type cho B5 tái dùng), `draft/.../00/02` (loại trừ), `staged/.../00/03` (thiếu `title` → MISSING_FIELD), `staged/.../00/04` (title `"Final Whistle: How a Last-Minute Penalty Decided the Derby"`), `staged/.../00/05` (category Unicode `văn-hóa`), `staged/.../00/06` (thin content ~98 từ, không kèm `meta.yaml` theo đúng diagram), `staged/.../00/07` (`publish_at: 2099-01-01` → skip)
+
+- [x] **B2b — Fixtures đa dạng category cho build thật (manual eyeball-check)**
+  Story: 1.0 · Vị trí: `src/cms/__test__/fixtures/staged/2026/06/01/`
+  Bổ sung 5 bài happy-path đầy đủ field (như `00/01`), mỗi bài ≥600 từ cho cả `en.md` và `vi.md` (qua quality gate ở cả hai locale — khác với `00/01/vi.md` chỉ là excerpt ngắn với frontmatter override). Mục đích: khi build pipeline (Phần C) hoàn thiện, mỗi bài sinh ra 2 HTML (en + vi) để kiểm tra bằng mắt — đa dạng category/subcategory ngoài `technology/general` đã có ở `00/01`:
+  - `01/01` — `sports/esports` (~683 từ) — "Inside the Arena Where a 16-Year-Old Became a World Champion"
+  - `02/01` — `sports/olympics` (~603 từ) — "The Swimmer Who Trains at 4 A.M. and Why It Might Be Worth It"
+  - `03/01` — `entertainment/film` (~606 từ) — "The Quiet Indie Film That Outsold Three Blockbusters Last Weekend"
+  - `04/01` — `entertainment/music` (~691 từ) — "The Band That Wrote an Entire Album in a Decommissioned Subway Station"
+  - `05/01` — `technology/ai` (~747 từ) — "The Translation App That Learned a Dying Language From Forty Hours of Tape"
+
+  Quy ước path: dùng `XX` (giờ) khác nhau cho mỗi bài mới (`01`-`05`) để phân biệt trực quan với nhóm `00/*` (special-purpose cases của B2), `YY = 01`. Category/subcategory chỉ dùng 3 category khai báo trong `config.yaml` (`sports`, `entertainment`, `technology`) với subcategory khác nhau.
 
 - [x] **B3 — Meta reader test**
   Story: 1.1 · File: `src/cms/__test__/meta.test.js`
-  Đã viết 7 case test `readMeta()` (import từ `src/cms/meta.js` — chưa tồn tại, đúng tinh thần fixture-first/test-first, hiện đang đỏ): required fields, optional fields pass-through, không có `draft`/`status`, lỗi `MISSING_FIELD { code, field, dir }`, title có dấu `:`, category Unicode, đọc được `publish_at` tương lai (việc skip thuộc về pipeline, không phải meta reader)
+  Đã viết 10 case test `readMeta()` theo tinh thần fixture-first/test-first (viết trước khi `src/cms/meta.js` tồn tại, sau đó implement và nay đã pass): required fields, optional fields pass-through, không có `draft`/`status`, lỗi `MISSING_FIELD { code, field, dir }`, title có dấu `:`, category Unicode, đọc được `publish_at` tương lai (việc skip thuộc về pipeline, không phải meta reader), cộng 3 case `readMeta(dir, locale)`: frontmatter override `title` thắng `meta.yaml`, field không override vẫn lấy từ `meta.yaml`, locale không có frontmatter trả về `meta.yaml` nguyên vẹn
 
 - [x] **B4 — Markdown body loader test**
   Story: 1.2 · File: `src/cms/__test__/markdown.test.js` (`test("markdown — body loader")`)
   Đã viết test load `en.md` qua `FS.load` — xác nhận không có frontmatter fence (`startsWith("---") === false`), ký tự đầu là nội dung bài viết (`#`)
 
+- [x] **B4b — Frontmatter extractor test** *(không có trong kế hoạch ban đầu — bổ sung cùng B4/B5)*
+  Story: 1.2 · File: `src/cms/__test__/markdown.test.js` (`test("markdown — frontmatter")`)
+  Đã viết 5 case test `extractFrontmatter()`: không có fence → `meta: null` + body nguyên vẹn, có fence → parse YAML block + body không còn `---`, block array (`tags`) trong frontmatter, fence mở nhưng không đóng → `meta: null` + trả nguyên text, `parseMarkdown()` strip frontmatter trước khi convert body
+
 - [x] **B5 — Markdown converter test**
   Story: 1.3 · File: `src/cms/__test__/markdown.test.js` (`test("markdown — converter")`)
-  Đã viết 11 case test `parseMarkdown()` (import từ `src/cms/markdown.js` — chưa tồn tại, hiện đang đỏ): h1–h6, bold, italic, inline code, code block, link, image, unordered/ordered list, blockquote, `---`, cộng 1 case convert toàn bộ fixture body 01 không throw
+  Đã viết 11 case test `parseMarkdown()` theo tinh thần fixture-first/test-first (viết trước khi `src/cms/markdown.js` tồn tại, sau đó implement và nay đã pass): h1–h6, bold, italic, inline code, code block, link, image, unordered/ordered list, blockquote, `---`, cộng 1 case convert toàn bộ fixture body 01 không throw
 
 - [x] **B6 — Config loader test**
   Story: 1.6 · File: `src/cms/__test__/config.test.js`
-  Đã tạo 4 fixture YAML trong `src/cms/__test__/fixtures/config/` (valid, thiếu `default_og_image`, thiếu `min_word_count`, thiếu `analytics` optional) và viết 6 case test `loadConfig()` (import từ `src/cms/config.js` — chưa tồn tại, hiện đang đỏ): load đúng required keys, trả về frozen object, optional `ga4_measurement_id` pass-through và không bắt buộc, throw khi thiếu `site.default_og_image`/`quality_gate.min_word_count`
-
-> **Lưu ý:** B3/B5/B6 hiện fail với `ERR_MODULE_NOT_FOUND` vì `src/cms/{meta,markdown,config}.js` chưa được viết — đây là trạng thái "đỏ" mong đợi của fixture-first discipline (fixture + test commit trước code). Chạy `npm run test:cms` để xác nhận.
+  Đã tạo 4 fixture YAML trong `src/cms/__test__/fixtures/config/` (`valid.yaml`, `missing-og-image.yaml`, `missing-min-word-count.yaml`, `no-analytics.yaml`), viết theo đúng cấu trúc nested của `src/cms/config.yaml` (`site:`, `analytics:`, `quality_gate:`, ...), và viết 6 case test `loadConfig()`: load đúng required keys, trả về frozen object, optional `ga4_measurement_id` pass-through và không bắt buộc, throw khi thiếu `site.default_og_image`/`quality_gate.min_word_count`
+  > **Lưu ý lịch sử**: fixtures ban đầu được tạo dạng `.json` (nested, giữ nguyên qua `JSON.parse`), trong khi `src/cms/config.js` đọc theo flat keys rồi tự dựng lại cấu trúc nested — shape này chỉ đúng khi input là `.yaml` (do `YAML.parse` flatten nested object). 5/6 case fail vì sai format fixture, không phải lỗi `config.js`. Đã sửa bằng cách chuyển fixtures sang `.yaml`; `config.js` không cần sửa.
 
 ---
 

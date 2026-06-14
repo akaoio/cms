@@ -1,0 +1,1 @@
+This article body is fine on its own — the problem is entirely in `meta.yaml`, which is missing the required `title` field. The meta reader must throw `{ code: 'MISSING_FIELD', field: 'title', dir }` when it encounters this fixture.

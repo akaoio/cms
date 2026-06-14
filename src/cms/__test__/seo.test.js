@@ -4,14 +4,14 @@ import assert from "node:assert"
 import { generateSEO } from "../seo.js"
 
 const META = {
-    title: "How Static Site Generators Are Reshaping Modern Publishing",
+    title: "Inside the Newsrooms Where AI Agents File the First Draft",
     date: "2026-06-01T00:00:00.000Z",
     category: "technology",
     subcategory: "general",
-    slug: "20260601-static-site-generators-modern-publishing",
-    description: "A look at why static site generators are winning back the web from heavyweight CMS platforms.",
-    image: "https://example.com/images/ssg-cover.jpg",
-    fb_caption: "Static sites are fast, cheap, and nearly unbreakable. Here's why publishers are switching back.",
+    slug: "20260601-ai-agents-in-the-newsroom",
+    description: "A look inside newsrooms that now let AI agents draft, fact-check, and format stories before a human editor ever opens the file.",
+    image: "https://example.com/images/ai-newsroom-cover.jpg",
+    fb_caption: "AI agents are writing the first draft of the news now — and editors say it's the best thing to happen to their inbox in years.",
     updated_at: "2026-06-02T00:00:00.000Z",
 }
 
@@ -25,7 +25,7 @@ const CONFIG = {
     quality_gate: { min_word_count: 600 },
 }
 
-const URL = "https://example.com/en/technology/static-site-generators-modern-publishing/"
+const URL = "https://example.com/en/technology/ai-agents-in-the-newsroom/"
 
 test("seo", async (t) => {
     await t.test("generateSEO — outputs all 5 required OG tags", () => {
@@ -41,7 +41,7 @@ test("seo", async (t) => {
     await t.test("generateSEO — og:image uses meta.image when present", () => {
         const html = generateSEO(META, CONFIG, URL)
 
-        assert.match(html, /https:\/\/example\.com\/images\/ssg-cover\.jpg/)
+        assert.match(html, /https:\/\/example\.com\/images\/ai-newsroom-cover\.jpg/)
     })
 
     await t.test("generateSEO — og:image falls back to config.site.default_og_image when meta.image absent", () => {
@@ -49,20 +49,20 @@ test("seo", async (t) => {
         const html = generateSEO(metaNoImage, CONFIG, URL)
 
         assert.match(html, /https:\/\/example\.com\/images\/default-og\.jpg/)
-        assert.doesNotMatch(html, /ssg-cover\.jpg/)
+        assert.doesNotMatch(html, /ai-newsroom-cover\.jpg/)
     })
 
     await t.test("generateSEO — fb:description uses fb_caption when present", () => {
         const html = generateSEO(META, CONFIG, URL)
 
-        assert.match(html, /Static sites are fast, cheap, and nearly unbreakable/)
+        assert.match(html, /AI agents are writing the first draft of the news now/)
     })
 
     await t.test("generateSEO — fb:description falls back to description[:160] when fb_caption absent", () => {
         const { fb_caption, ...metaNoCaption } = META
         const html = generateSEO(metaNoCaption, CONFIG, URL)
 
-        assert.match(html, /A look at why static site generators/)
+        assert.match(html, /A look inside newsrooms that now let AI agents/)
     })
 
     await t.test("generateSEO — JSON-LD contains Article schema with required fields", () => {

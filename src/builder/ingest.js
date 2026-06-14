@@ -1,13 +1,13 @@
 import { FS } from '../core/FS.js'
 
 /**
- * ingest — Recursively scans content/posts/published/** for article folders.
+ * ingest — Recursively scans content/posts/staged/** for article folders.
  * An article folder is identified by the presence of 'meta.yaml'.
- * 
+ *
  * @returns {Promise<string[][]>} Array of directory paths (as string arrays)
  */
 export async function ingest() {
-    const root = ['content', 'posts', 'published']
+    const root = ['content', 'posts', 'staged']
     const results = []
 
     async function walk(currentPath) {

@@ -450,7 +450,7 @@ src/cms/__test__/fixtures/
 │       └── meta.yaml            ← missing "title" field → should fail validation
 ├── staged/
 │   └── 2026/06/01/00/04/
-│       └── meta.yaml            ← title: "Barça: el partido" — quoted string in YAML
+│       └── meta.yaml            ← title: "Final Whistle: How a Last-Minute Penalty Decided the Derby" — colon in YAML title
 ├── staged/
 │   └── 2026/06/01/00/05/
 │       └── meta.yaml            ← category with Unicode characters

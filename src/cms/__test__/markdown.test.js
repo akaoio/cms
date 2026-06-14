@@ -9,18 +9,18 @@ const dir = (...parts) => [...FIXTURES, ...parts]
 
 test("markdown — body loader", async (t) => {
     await t.test("loads a body .md with no frontmatter fence — first character is article content", async () => {
-        const body = await FS.load(dir("published", "2026", "06", "01", "00", "01", "en.md"))
+        const body = await FS.load(dir("staged", "2026", "06", "01", "00", "01", "en.md"))
 
         assert.strictEqual(typeof body, "string")
         assert.strictEqual(body.startsWith("---"), false)
         assert.strictEqual(body[0], "#")
-        assert.strictEqual(body.startsWith("# How Static Site Generators"), true)
+        assert.strictEqual(body.startsWith("# Inside the Newsrooms"), true)
     })
 
     await t.test("loads thin-content fixture body verbatim, with no fence stripping needed", async () => {
-        const body = await FS.load(dir("published", "2026", "06", "01", "00", "06", "en.md"))
+        const body = await FS.load(dir("staged", "2026", "06", "01", "00", "06", "en.md"))
 
-        assert.strictEqual(body.startsWith("# A Short Note"), true)
+        assert.strictEqual(body.startsWith("# Quick Note:"), true)
     })
 })
 
@@ -146,14 +146,14 @@ test("markdown — converter", async (t) => {
     })
 
     await t.test("converts the full fixture article body without throwing", async () => {
-        const body = await FS.load(dir("published", "2026", "06", "01", "00", "01", "en.md"))
+        const body = await FS.load(dir("staged", "2026", "06", "01", "00", "01", "en.md"))
         const html = parseMarkdown(body)
 
         assert.strictEqual(typeof html, "string")
-        assert.match(html, /<h1>How Static Site Generators Are Reshaping Modern Publishing<\/h1>/)
-        assert.match(html, /<h2>Why Speed Still Wins<\/h2>/)
+        assert.match(html, /<h1>Inside the Newsrooms Where AI Agents File the First Draft<\/h1>/)
+        assert.match(html, /<h2>Why Editors Stopped Resisting<\/h2>/)
         assert.match(html, /<blockquote>/)
         assert.match(html, /<hr\s*\/?>/)
-        assert.match(html, /<img src="https:\/\/example\.com\/images\/pipeline-diagram\.png"/)
+        assert.match(html, /<img src="https:\/\/example\.com\/images\/ai-newsroom-cover\.jpg"/)
     })
 })

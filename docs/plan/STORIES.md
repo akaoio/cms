@@ -76,7 +76,7 @@
   │   ├── en.md
   │   └── meta.yaml      ← missing "title" → should fail validation
   ├── staged/2026/06/01/00/04/
-  │   └── meta.yaml      ← title: "Barça: el partido" — colon in title
+  │   └── meta.yaml      ← title: "Final Whistle: How a Last-Minute Penalty Decided the Derby" — colon in title
   ├── staged/2026/06/01/00/05/
   │   └── meta.yaml      ← category với Unicode characters
   ├── staged/2026/06/01/00/06/
