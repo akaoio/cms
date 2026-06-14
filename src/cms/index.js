@@ -16,8 +16,7 @@ export async function loadManifest() {
     if (!(await FS.exist(path))) return null
 
     try {
-        const raw = await FS.load(path)
-        return JSON.parse(raw)
+        return await FS.load(path)
     } catch (err) {
         console.error('Failed to load manifest.json', err)
         return null

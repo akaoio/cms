@@ -1,0 +1,26 @@
+# Minimal config fixture for pipeline.test.js (C2) — mirrors src/cms/config.yaml shape
+locales:
+  active: [en, vi]
+  available: [en, vi]
+
+categories:
+  - technology
+
+adsense:
+  publisher_id: ca-pub-0000000000000000
+  slots:
+    top: "0000000000"
+    mid: "0000000000"
+    bottom: "0000000000"
+
+site:
+  title: Test Site
+  url: http://localhost:3000
+  description: A test site
+  default_og_image: /img/default-og.jpg
+
+analytics:
+  ga4_measurement_id: G-TESTXXXXXX
+
+quality_gate:
+  min_word_count: 600

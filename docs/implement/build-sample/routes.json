@@ -1,0 +1,22 @@
+[
+  {
+    "pattern": "/{date}/{cat1}/{cat2}/{slug}/{locale}/",
+    "component": "cms-page"
+  },
+  {
+    "pattern": "/{cat1}/{cat2}/",
+    "component": "cms-list"
+  },
+  {
+    "pattern": "/{cat1}/",
+    "component": "cms-list"
+  },
+  {
+    "pattern": "/tag/{tag}/",
+    "component": "cms-list"
+  },
+  {
+    "pattern": "/{page}/",
+    "component": "cms-page"
+  }
+]

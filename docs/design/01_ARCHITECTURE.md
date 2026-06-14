@@ -176,7 +176,19 @@ DB.js validates hash        (background: serves from IndexedDB cache if unchange
   "v": 1,
   "built": "2026-06-01T00:00:00Z",
   "entries": {
-    "my-article": { "hash": "sha256hex", "locale": "en", "category": "sports" }
+    "my-article:en": {
+      "hash": "sha256hex",
+      "locale": "en",
+      "category": "sports",
+      "subcategory": "worldcup",
+      "date": "20260630",
+      "date_iso": "2026-06-30T00:00:00Z",
+      "slug": "my-article",
+      "title": "...",
+      "description": "...",
+      "tags": ["..."],
+      "url": "/20260630/sports/worldcup/my-article/en/"
+    }
   }
 }
 ```
@@ -203,11 +215,13 @@ DB.js validates hash        (background: serves from IndexedDB cache if unchange
 
 ### ADR-004: Build Error Reporting
 
-**Decision:** Failed files write to `build/errors.log`:
+**Decision:** Failed files write to `build/errors.log` as newline-delimited JSON. `appendError(data)` in `src/builder/errors.js` stamps `ts: ISO8601` and spreads the caller's fields as-is — current call sites in `pipeline.js` use `{ ts, code, dir, locale?, ... }` (e.g. `{ code: 'THIN_CONTENT', wordCount, dir, locale }`, `{ dir, locale, error }`, `{ dir, error }`).
 
 ```json
-{ "ts": "ISO8601", "file": "content/posts/slug.md", "error": "missing title" }
+{ "ts": "ISO8601", "code": "THIN_CONTENT", "dir": "content/posts/staged/...", "locale": "en", "wordCount": 120 }
 ```
+
+> **Pending normalization (see Phần C, C3):** call sites are not yet consistent — some omit `code`, some use `error` instead of `detail`. Target schema is `{ ts, dir, code, detail }` for all entries; not yet implemented.
 
 Build exits code 0 (success), prints error count. AI Agent reads `errors.log` for retry.
 
@@ -242,7 +256,9 @@ content/posts/staged/   ← ingest.js recurses here only; "staged" = ready for b
 content/posts/archived/ ← redirect stubs generated; URL never 404s
 ```
 
-No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recurse into `staged/`**.
+No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recurse into `staged/`** for article rendering.
+
+> **Current state:** `ingest.js` only scans `staged/`. `archived/` redirect-stub generation is **not yet implemented** — `pipeline.js` will need a separate pass over `archived/` (read `slug`, look up old URL in `manifest.json`, emit redirect HTML). See Phần C, C2.
 
 **Why:** Folder position is a hard structural guard — no code can accidentally build a draft by ignoring a flag. With thousands of articles/day, a soft textual guard (`status: draft` in a file) creates unavoidable co-mingling of states in the same tree. The factory-model makes state unambiguous to both tools and humans. The name `staged/` reflects the Git staging area analogy: content approved for the next build, not yet live on CDN.
 
@@ -312,14 +328,14 @@ No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recur
 
 ### `src/builder/` — Build orchestration (Node.js only)
 
-| File               | Owns                                                                                                                                             | FRs             |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
-| `cms.js`           | CLI entry point — `npm run build:cms`                                                                                                            | FR-2.1          |
-| `ingest.js`        | Recursively scans `content/posts/staged/**` + `content/pages/**` only; `draft/` and `archived/` are never touched; draft exclusion is structural | FR-1.4, FR-1.5  |
-| `pipeline.js`      | Drives full build loop: ingest → index → render → routes → feed                                                                                  | FR-2.1          |
-| `render.js`        | `renderPage(meta, bodyHtml, seoHtml, config, siblings)` → full HTML; output path: `YYYYMMDD/{cat1}/{cat2}/{slug}/{locale}/index.html`            | FR-2.6, FR-3.1  |
-| `routes-inject.js` | Appends article/category/tag/page routes to Router manifest                                                                                      | FR-3.1–3.5      |
-| `errors.js`        | Appends `{ ts, file, error }` to `build/errors.log` — never throws                                                                               | FR-1.4, ADR-004 |
+| File               | Owns                                                                                                                                                                                                            | FRs             |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `cms.js`           | CLI entry point — `npm run build:cms`                                                                                                                                                                          | FR-2.1          |
+| `ingest.js`        | Recursively scans `content/posts/staged/**` only; `draft/` is never touched, draft exclusion is structural. **Pending:** `content/pages/**` and `archived/**` scanning not yet implemented (see Phần C, C2)  | FR-1.4, FR-1.5  |
+| `pipeline.js`      | Drives full build loop: ingest → index → render → routes → feed. **Pending (Phần C, C2):** DUPLICATE_SLUG check, archived redirect emission                                                                  | FR-2.1          |
+| `render.js`        | `renderPage(meta, bodyHtml, seoHtml, config, siblings)` returns HTML; output: `YYYYMMDD/{cat1}/{cat2}/{slug}/{locale}/index.html`. Note: `siblings` unused by pipeline, hreflang unwired                     | FR-2.6, FR-3.1  |
+| `routes-inject.js` | Writes 5 fixed pattern entries (article/category×2/tag/page) to `build/routes.json` via full overwrite — idempotent, constant size                                                                            | FR-3.1–3.5      |
+| `errors.js`        | `appendError(data)` stamps `ts` and writes `data` as newline-delimited JSON to `build/errors.log` — never throws (see ADR-004)                                                                                | FR-1.4, ADR-004 |
 
 ### `src/UI/components/` — Web Components (browser, light DOM)
 
@@ -335,8 +351,10 @@ URL format confirmed: `/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/`
 | Path                                     | URL Example                               |
 | ---------------------------------------- | ----------------------------------------- |
 | `/{date}/{cat1}/{cat2}/{slug}/{locale}/` | `/20260630/sport/worldcup/my-article/en/` |
-| `/{date}/{cat1}/{cat2}/`                 | `/20260630/sport/worldcup/`               |
-| `/{date}/{cat1}/`                        | `/20260630/sport/`                        |
+| `/{cat1}/{cat2}/`                        | `/sport/worldcup/`                        |
+| `/{cat1}/`                               | `/sport/`                                 |
+| `/tag/{tag}/`                            | `/tag/football/`                          |
+| `/{page}/`                               | `/about/`                                 |
 
 **⚠️ Router.js impact:** Router hiện tại parse locale ở segment đầu (`/en/sports/...`). Format mới có locale ở segment cuối — cần cập nhật `Router.js` và `routes.json` patterns.
 
@@ -346,14 +364,15 @@ URL format confirmed: `/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/`
 
 ```json
 [
-  { "pattern": "/{locale}/{category}/{slug}/", "component": "cms-page" },
-  { "pattern": "/{locale}/{category}/",        "component": "cms-list" },
-  { "pattern": "/{locale}/tag/{tag}/",         "component": "cms-list" },
-  { "pattern": "/{locale}/{page}/",            "component": "cms-page" }
+  { "pattern": "/{date}/{cat1}/{cat2}/{slug}/{locale}/", "component": "cms-page" },
+  { "pattern": "/{cat1}/{cat2}/",                        "component": "cms-list" },
+  { "pattern": "/{cat1}/",                               "component": "cms-list" },
+  { "pattern": "/tag/{tag}/",                            "component": "cms-list" },
+  { "pattern": "/{page}/",                               "component": "cms-page" }
 ]
 ```
 
-`routes.json` size stays **constant** regardless of article count. Story 1.7 implements this pattern — never injects per-article entries.
+`routes.json` size stays **constant** regardless of article count (5 fixed patterns, written via full overwrite — idempotent). `tag`/`page` patterns carry no `{locale}` segment; locale for those routes is resolved via `Context.js`, not the URL. Story 1.7 implements this pattern — never injects per-article entries.
 
 ---
 
@@ -385,8 +404,8 @@ for (const file of files) {
         // Hash must be written immediately after output
         await FS.write(hashPath, sha256(JSON.stringify(post)))
     } catch (err) {
-        await appendError({ ts: new Date().toISOString(), file, error: err.message })
-        // continue — never rethrow, never abort build
+        await appendError({ dir, error: err.message })
+        // ts is stamped by appendError() itself — continue, never rethrow, never abort build
     }
 }
 ```
@@ -544,7 +563,7 @@ Before any story is started:
 7.  build:cms pipeline (src/builder/cms.js + src/builder/pipeline.js)
 8.  Hash generation + errors.log (src/builder/errors.js)
 9.  Content index + manifest.json (src/cms/index.js)
-10. Route injection (src/builder/routes-inject.js) — 4 patterns only, constant size
+10. Route injection (src/builder/routes-inject.js) — 5 fixed patterns, constant size
 11. SEO module (src/cms/seo.js)
 12. Sitemap + RSS + robots.txt (src/cms/feed.js)
 13. Verify: build/ output matches contract in SCOPE.md
