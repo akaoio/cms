@@ -6,7 +6,8 @@
     "build:cms": "node src/builder/cms.js",
     "test:core": "node --test \"src/core/__test__/**/*.js\"",
     "test:cms": "node --test \"src/cms/__test__/**/*.js\"",
-    "test": "npm run test:core && npm run test:cms"
+    "test:builder": "node --test \"src/builder/__test__/**/*.js\"",
+    "test": "npm run test:core && npm run test:cms && npm run test:builder"
   },
   "repository": {
     "type": "git",

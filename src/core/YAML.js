@@ -55,6 +55,59 @@ export function stringify(value) {
     return `${scalar(value)}\n`
 }
 
-export const YAML = { stringify }
+function parseScalar(val) {
+    if (val === '' || val === 'null' || val === '~') return null
+    if (val === 'true' || val === 'yes') return true
+    if (val === 'false' || val === 'no') return false
+    if (val.startsWith('"')) { try { return JSON.parse(val) } catch { return val.slice(1, -1) } }
+    if (val.startsWith("'")) return val.slice(1, -1).replace(/''/g, "'")
+    if (/^-?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(val)) return Number(val)
+    return val
+}
+
+/**
+ * Parse a subset of YAML: flat key-value pairs and block arrays.
+ * Covers the meta.yaml format (no nested objects, no flow collections).
+ * @param {string} text
+ * @returns {object}
+ */
+export function parse(text) {
+    const result = {}
+    const lines = text.replace(/\r\n/g, '\n').split('\n')
+    let i = 0
+
+    while (i < lines.length) {
+        const line = lines[i]
+        const trimmed = line.trim()
+
+        if (!trimmed || trimmed === '---' || trimmed === '...' || trimmed.startsWith('#')) {
+            i++; continue
+        }
+
+        const colonIdx = line.indexOf(':')
+        if (colonIdx === -1) { i++; continue }
+
+        const key = line.slice(0, colonIdx).trim()
+        const rest = line.slice(colonIdx + 1).trim()
+
+        if (rest === '') {
+            // Block array or empty value — peek ahead for array items
+            const arr = []
+            i++
+            while (i < lines.length && /^\s+-\s*/.test(lines[i])) {
+                arr.push(parseScalar(lines[i].replace(/^\s+-\s*/, '').trim()))
+                i++
+            }
+            result[key] = arr.length ? arr : null
+        } else {
+            result[key] = parseScalar(rest)
+            i++
+        }
+    }
+
+    return result
+}
+
+export const YAML = { stringify, parse }
 
 export default YAML

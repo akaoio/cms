@@ -1,6 +1,6 @@
 # Product Requirements Document — Akao CMS
 
-**Status:** ✅ Updated — 2026-06-05 (merged SCOPE.md; GA4 deferred; quality gate detail added; archived redirect stub added)
+**Status:** ✅ Updated — 2026-06-08 (meta.json → meta.yaml; frontmatter in locale.md; URL format + subcategory field locked)
 
 ---
 
@@ -93,23 +93,23 @@ Akao CMS is built on top of the **akao shop project** by deleting all eCommerce/
 
 ### FR-1 — Content Ingestion
 
-| ID     | Requirement                                                                                                                                                                                                                                                                                                                                     |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| FR-1.1 | Read article metadata from `meta.json` — fields: `title` (req), `slug` (opt), `date` (req, ISO 8601), `category` (req), `tags` (opt array), `description` (req), `image` (opt URL), `lang` (opt), `fb_caption` (opt), `publish_at` (opt, ISO 8601), `updated_at` (opt, ISO 8601). Parsed via native `JSON.parse()` — no YAML, no custom parser. |
-| FR-1.2 | Convert Markdown body to HTML — `# h1–h6`, `**bold**`, `*italic*`, `` `code` ``, ` ```block``` `, `[link](url)`, `![img](url)`, `- list`, `1. list`, `> blockquote`, `---`                                                                                                                                                                      |
-| FR-1.3 | Each article is a folder containing `<locale>.md` (body only, no frontmatter fence) + `meta.json`. Metadata parsed via native `JSON.parse()` — zero dependencies, no eval, no third-party library.                                                                                                                                              |
-| FR-1.4 | Per-file error isolation — one bad article folder skipped, logged to `build/errors.log`, build continues.                                                                                                                                                                                                                                       |
-| FR-1.5 | Draft exclusion — build pipeline only recurses into `content/posts/published/`. Files in `draft/` and `archived/` are never read by ingest. Status is structural (folder position), not textual (field value).                                                                                                                                  |
-| FR-1.6 | Required field validation — articles missing `title`, `date`, `category` in `meta.json` rejected with structured error.                                                                                                                                                                                                                         |
+| ID     | Requirement                                                                                                                                                                                                                                                                                                                                                        |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| FR-1.1 | Read article metadata from `meta.yaml` — fields: `title` (req), `slug` (opt), `date` (req, ISO 8601), `category` (req), `subcategory` (req), `tags` (opt array), `description` (req), `image` (opt URL), `lang` (opt), `fb_caption` (opt), `publish_at` (opt, ISO 8601), `updated_at` (opt, ISO 8601). Parsed via `src/core/YAML.js` — zero external dependencies. |
+| FR-1.2 | Convert Markdown body to HTML — `# h1–h6`, `**bold**`, `*italic*`, `` `code` ``, ` ```block``` `, `[link](url)`, `![img](url)`, `- list`, `1. list`, `> blockquote`, `---`                                                                                                                                                                                         |
+| FR-1.3 | Each article is a folder containing `<locale>.md` (body text; optional YAML frontmatter block at top overrides `meta.yaml` fields when present) + `meta.yaml` (shared metadata). Parsed via `YAML.js` — zero dependencies, no eval, no third-party library.                                                                                                        |
+| FR-1.4 | Per-file error isolation — one bad article folder skipped, logged to `build/errors.log`, build continues.                                                                                                                                                                                                                                                          |
+| FR-1.5 | Draft exclusion — build pipeline only recurses into `content/posts/staged/`. Files in `draft/` and `archived/` are never read by ingest. Status is structural (folder position), not textual (field value). `staged/` = approved for build, not yet live on CDN.                                                                                                   |
+| FR-1.6 | Required field validation — articles missing `title`, `date`, `category`, `subcategory` in `meta.yaml` rejected with structured error.                                                                                                                                                                                                                             |
 
 ### FR-2 — Build Pipeline
 
 | ID     | Requirement                                                                                                                                                                                                |
 | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| FR-2.1 | `npm run build:cms` → `build/{locale}/{category}/{slug}/index.html` + `build/manifest.json` + `build/index.json`                                                                                           |
+| FR-2.1 | `npm run build:cms` → `build/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/index.html` + `build/manifest.json` + `build/index.json`                                                                             |
 | FR-2.2 | SHA-256 hash for every HTML output; `index.hash` written alongside — feeds DB.js offline cache contract.                                                                                                   |
 | FR-2.3 | Incremental build — `build/manifest.json` stores `{ slug: contentHash }`; only changed files rebuilt. Hash diff, not mtime.                                                                                |
-| FR-2.4 | Config-driven locale activation — `src/cms/config.yaml` `active: [en]`; adding locale = config change + rebuild, zero code changes.                                                                      |
+| FR-2.4 | Config-driven locale activation — `src/cms/config.yaml` `active: [en]`; adding locale = config change + rebuild, zero code changes.                                                                        |
 | FR-2.5 | Config-driven categories — adding category = config change + rebuild, zero code changes.                                                                                                                   |
 | FR-2.6 | 18-locale infrastructure — pipeline supports all 18 locales; only `active` ones are built.                                                                                                                 |
 | FR-2.7 | `archived/` articles — build emits a redirect stub at `build/{path}/index.html` so archived URLs never return 404.                                                                                         |
@@ -117,13 +117,13 @@ Akao CMS is built on top of the **akao shop project** by deleting all eCommerce/
 
 ### FR-3 — Routing & Pages
 
-| ID     | Requirement                                                                               |
-| ------ | ----------------------------------------------------------------------------------------- |
-| FR-3.1 | Article page — `/{locale}/{category}/{slug}/`                                             |
-| FR-3.2 | Category listing — `/{locale}/{category}/`                                                |
-| FR-3.3 | Tag listing — `/{locale}/tag/{tag}/`                                                      |
-| FR-3.4 | Static pages — `/{locale}/about/`, `/contact/`, `/privacy-policy/` (required for AdSense) |
-| FR-3.5 | Routes auto-injected into `routes.json` at build time — no manual registration.           |
+| ID     | Requirement                                                                      |
+| ------ | -------------------------------------------------------------------------------- |
+| FR-3.1 | Article page — `/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/`                      |
+| FR-3.2 | Category listing — `/{cat1}/{cat2}/`                                             |
+| FR-3.3 | Tag listing — `/tag/{tag}/`                                                      |
+| FR-3.4 | Static pages — `/about/`, `/contact/`, `/privacy-policy/` (required for AdSense) |
+| FR-3.5 | Routes auto-injected into `routes.json` at build time — no manual registration.  |
 
 ### FR-4 — SEO & Distribution
 
@@ -180,23 +180,24 @@ Enforced by build pipeline — no human intervention needed.
 ```text
 1. AI generates: title, body, meta description, image URL
 2. AI writes:
-   - content/posts/published/YYYY/MM/DD/XX/YY/en.md  ← body only, no frontmatter
-   - content/posts/published/YYYY/MM/DD/XX/YY/meta.json
+   - content/posts/draft/YYYY/MM/DD/XX/YY/en.md  ← body; optional YAML frontmatter at top for locale overrides
+   - content/posts/draft/YYYY/MM/DD/XX/YY/meta.yaml
    (XX/YY = article ID chunked into 2-digit pairs; max 100 subfolders per level)
-3. AI runs: npm run build:cms
-4. Build:
-   - Recursively scan published/** only (draft/ never touched)
-   - Read meta.json via JSON.parse → validate required fields
-   - Read <locale>.md body → Convert Markdown → HTML
+3. Review (category + policy check) → git mv draft/ → staged/ (same date, ADR-006)
+4. AI runs: npm run build:cms
+5. Build:
+   - Recursively scan staged/** only (draft/ never touched)
+   - Read meta.yaml via YAML.js → validate required fields (title, date, category, subcategory)
+   - Read <locale>.md → extract optional frontmatter → merge over meta.yaml → convert body Markdown → HTML
    - Compute SHA-256 hash → write index.hash
-   - Write build/{locale}/{category}/{slug}/index.html
+   - Write build/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/index.html
    - Update build/manifest.json (incremental diff)
    - Inject route into routes.json
    - Update sitemap.xml + rss.xml
-5. Article live at /{locale}/{category}/{slug}/
-6. AI calls Social MCP: post(url, teaser) → Facebook pages
-7. Facebook preview uses OG tags from article page
-8. Reader clicks → AdSense loads → impression → $$$
+6. Article live at /{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/
+7. AI calls Social MCP: post(url, teaser) → Facebook pages
+8. Facebook preview uses OG tags from article page
+9. Reader clicks → AdSense loads → impression → $$$
 ```
 
 ### UJ-2 — Operator adds a new category
@@ -204,7 +205,7 @@ Enforced by build pipeline — no human intervention needed.
 ```text
 1. Edit src/cms/config.yaml: add "technology" to categories list
 2. Run: npm run build:cms
-3. /{locale}/technology/ listing route generated automatically
+3. /technology/ listing route generated automatically
 4. AI can now write articles with category: technology
 5. Zero code changes required
 ```
@@ -214,7 +215,7 @@ Enforced by build pipeline — no human intervention needed.
 ```text
 1. Edit src/cms/config.yaml: add "es" to active locales
 2. Run: npm run build:cms
-3. /es/{category}/{slug}/ routes generated for all content with lang: es
+3. /{YYYYMMDD}/{cat1}/{cat2}/{slug}/es/ routes generated for all content with lang: es
 4. Spanish sitemap.xml generated automatically
 5. Zero code changes required
 ```
@@ -230,7 +231,7 @@ Enforced by build pipeline — no human intervention needed.
 | WebAuthn admin auth               | Phase 2     | No user sessions in this flow                             |
 | Comment system                    | Phase 2     | ZEN.js integration                                        |
 | Video content pipeline            | Phase 2+    | Images only for MVP                                       |
-| Image resize / media CDN          | Phase 2     | AI provides image URL directly in meta.json               |
+| Image resize / media CDN          | Phase 2     | AI provides image URL directly in meta.yaml               |
 | Full-text search                  | Phase 2     | SQL.js removed for MVP                                    |
 | ZEN.js integration                | Phase 2     | Multi-author, realtime sync                               |
 | Deploy automation / CI-CD         | Deferred    | Local-first first; deploy decision pending                |
@@ -292,10 +293,11 @@ Enforced by build pipeline — no human intervention needed.
 | Admin UI               | Phase 2; logic-first approach                                                                                                                                                                    |
 | SQL layer              | Removed for MVP; re-add when search is scoped                                                                                                                                                    |
 | Build trigger          | Manual `npm run build:cms`; file watcher Phase 2                                                                                                                                                 |
-| Image handling         | URL passthrough in `meta.json` `image` field — no processing                                                                                                                                     |
-| Content file structure | `content/posts/{status}/YYYY/MM/DD/XX/YY/<locale>.md + meta.json`. Chunked 2-digit ID (e.g., 1042 → `/10/42/`) caps fan-out at 100 subfolders per level — VS Code stays usable at 330K articles. |
-| Status management      | Factory-model folders: `draft/`, `published/`, `archived/`. Build recurses `published/` only. Status is structural, never a file field.                                                          |
-| Metadata format        | `meta.json` (JSON, not YAML). No frontmatter fence in `.md` files. `JSON.parse()` is zero-dep, V8-native, throws with position on errors.                                                        |
+| Image handling         | URL passthrough in `meta.yaml` `image` field — no processing                                                                                                                                     |
+| Content file structure | `content/posts/{status}/YYYY/MM/DD/XX/YY/<locale>.md + meta.yaml`. Chunked 2-digit ID (e.g., 1042 → `/10/42/`) caps fan-out at 100 subfolders per level — VS Code stays usable at 330K articles. |
+| Status management      | Factory-model folders: `draft/`, `staged/`, `archived/`. Build recurses `staged/` only. `staged/` = approved for build, not yet live on CDN. Status is structural, never a file field.           |
+| Metadata format        | `meta.yaml` (YAML, human-written). Optional YAML frontmatter in `<locale>.md` overrides `meta.yaml` fields. Parsed via `src/core/YAML.js` — zero external dependencies.                          |
+| URL format             | `/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/` — date first, locale last. e.g. `/20260601/sports/football/my-slug/vi/`                                                                             |
 
 ---
 
@@ -338,37 +340,51 @@ quality_gate:
 
 Each article is a folder containing:
 
-- `<locale>.md` — body only, no `---` frontmatter fence
-- `meta.json` — all metadata
+- `<locale>.md` — body text; optional YAML frontmatter block between `---` delimiters at top overrides `meta.yaml` fields for that locale
+- `meta.yaml` — shared metadata (applies to all locales unless overridden)
 
-```json
-{
-  "title": "My Article Title",
-  "slug": "my-article-title",
-  "date": "2026-06-01",
-  "category": "sports",
-  "tags": ["football", "premier-league"],
-  "description": "Short description",
-  "image": "https://example.com/img.jpg",
-  "lang": "en",
-  "fb_caption": "Hook ngắn cho Facebook — emotion-driven, ≤160 chars; fallback: description[:160]",
-  "publish_at": "2026-06-05T09:00:00+07:00",
-  "updated_at": "2026-06-10"
-}
+```yaml
+title: My Article Title
+slug: my-article-title
+date: "2026-06-01T00:00:00.000Z"
+category: sports
+subcategory: football
+tags:
+  - football
+  - premier-league
+description: Short description
+image: https://example.com/img.jpg
+lang: en
+fb_caption: "Hook ngắn cho Facebook — emotion-driven, ≤160 chars; fallback: description[:160]"
+publish_at: "2026-06-05T09:00:00+07:00"
+updated_at: "2026-06-10"
+```
+
+**Locale frontmatter example** — `vi.md` starts with:
+
+```markdown
+---
+title: Tiêu đề bản tiếng Việt
+description: Mô tả ngắn bằng tiếng Việt.
+lang: vi
+fb_caption: Hook Facebook tiếng Việt.
+---
+
+# Nội dung bài viết...
 ```
 
 Fields removed vs old frontmatter schema:
 
 - `draft` — removed; draft status = article lives in `content/posts/draft/` folder
-- `status` — removed; status = folder position (`draft/`, `published/`, `archived/`)
+- `status` — removed; status = folder position (`draft/`, `staged/`, `archived/`)
 
 Folder position → build behavior:
 
-| Folder       | Build behavior                                                      |
-| ------------ | ------------------------------------------------------------------- |
-| `published/` | Built and deployed                                                  |
-| `draft/`     | Never scanned — invisible to build                                  |
-| `archived/`  | `build/{path}/index.html` written as redirect stub — URL never 404s |
+| Folder      | Build behavior                                                      |
+| ----------- | ------------------------------------------------------------------- |
+| `staged/`   | Built and deployed — "staged" = ready for build, not yet live       |
+| `draft/`    | Never scanned — invisible to build                                  |
+| `archived/` | `build/{path}/index.html` written as redirect stub — URL never 404s |
 
 ---
 
@@ -382,21 +398,48 @@ build/
 ├── sitemap.xml            ← per active locale
 ├── rss.xml                ← per category per active locale
 ├── robots.txt
-└── {locale}/
-    └── {category}/
-        └── {slug}/
-            ├── index.html ← complete pre-rendered HTML with AdSense slots
-            └── index.hash ← SHA-256 of HTML content
+└── {YYYYMMDD}/
+    └── {cat1}/
+        └── {cat2}/
+            └── {slug}/
+                └── {locale}/
+                    ├── index.html ← complete pre-rendered HTML with AdSense slots
+                    └── index.hash ← SHA-256 of HTML content
 ```
+
+---
+
+## Appendix — Original 16 Requirements (resolved)
+
+Akao CMS bắt nguồn từ mô hình `AI writes → Facebook drives → AdSense pays`, phân rã thành 16 requirements theo 5 layer. Tất cả đã được resolve vào FR/NFR/schema ở trên; giữ lại đây làm rationale gốc.
+
+| Layer                | #   | Requirement                                             | Resolved tại                                                          |
+| -------------------- | --- | ------------------------------------------------------- | --------------------------------------------------------------------- |
+| 1 — AdSense fires    | 1   | Static HTML tại URL cố định                             | FR-2.1, FR-3.1                                                        |
+| 1                    | 2   | AdSense slots trong initial HTML                        | FR-5.3, NFR-3                                                         |
+| 1                    | 3   | Content pass AdSense policy (không thin/adult/violence) | Quality Gate Rules (`word_count < 600`)                               |
+| 1                    | 4   | Page load < 3s mobile                                   | NFR-3                                                                 |
+| 2 — Facebook traffic | 5   | Full OG tags trong `<head>`                             | FR-4.2                                                                |
+| 2                    | 6   | `og:image` fallback khi article thiếu image             | Config Schema `site.default_og_image`                                 |
+| 2                    | 7   | `fb_caption` per article                                | Meta Schema `fb_caption`, fallback `description[:160]`                |
+| 2                    | 8   | Canonical URL ổn định, slug immutable                   | FR-4.1, Locked Decisions URL format                                   |
+| 3 — Pipeline tự động | 9   | AI trigger build không cần manual                       | Locked Decisions "Build trigger" — deferred, file watcher Phase 2     |
+| 3                    | 10  | Fault isolation — 1 file lỗi không kill batch           | FR-1.4, NFR-5                                                         |
+| 3                    | 11  | `errors.log` machine-readable                           | FR-1.4, Build Output Contract                                         |
+| 3                    | 12  | Draft state excluded khỏi output                        | FR-1.5                                                                |
+| 4 — Bảo vệ tài sản   | 13  | Quality gate: word count + duplicate slug/content       | Quality Gate Rules                                                    |
+| 4                    | 14  | No invalid traffic / click fraud                        | Operational rule — không trong code                                   |
+| 5 — Feedback loop    | 15  | Traffic data (GA4 + GSC)                                | Config Schema `analytics.ga4_measurement_id`, Out of Scope (Post-MVP) |
+| 5                    | 16  | Revenue data per article (AdSense RPM)                  | Out of Scope — cần AdSense Reporting API, Post-MVP                    |
 
 ---
 
 ## Definition of Done — MVP
 
 ```text
-✅ AI Agent writes meta.json + <locale>.md to content/posts/published/YYYY/MM/DD/XX/YY/
+✅ AI Agent writes meta.yaml + <locale>.md to content/posts/staged/YYYY/MM/DD/XX/YY/
 ✅ npm run build:cms succeeds with zero errors
-✅ build/{locale}/{category}/{slug}/index.html exists with complete HTML
+✅ build/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/index.html exists with complete HTML
 ✅ AdSense script present on page (in initial HTML, not deferred)
 ✅ Open Graph tags correct → validated with Facebook Sharing Debugger
 ✅ sitemap.xml contains URL of new article
@@ -405,7 +448,7 @@ build/
 ✅ Incremental build: add 1 article → only 1 file rebuilt
 ✅ Add locale to config.yaml → rebuild → new locale online, zero code changes
 ✅ Add category to config.yaml → rebuild → new listing route exists, zero code changes
-✅ Quality gate rejects article < 300 words, logs to errors.log
+✅ Quality gate rejects article < 600 words, logs to errors.log
 ✅ 1 bad article does not crash the build — errors.log has enough detail for AI to self-fix
 ✅ No <script> tag in any emitted HTML is missing defer or type="module" — verified by build pipeline (FR-2.8)
 ```

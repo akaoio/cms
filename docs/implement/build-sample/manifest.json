@@ -1,0 +1,176 @@
+{
+  "v": 1,
+  "built": "2026-06-14T19:41:07.686Z",
+  "entries": {
+    "20260601-teen-esports-world-champion:en": {
+      "hash": "8b6e9bccb3065b3d279203a336af7814f5b17c5c1f37ac356516f8ea929fd392",
+      "locale": "en",
+      "category": "sports",
+      "subcategory": "esports",
+      "date": "20260601",
+      "date_iso": "2026-06-01T01:00:00.000Z",
+      "slug": "20260601-teen-esports-world-champion",
+      "title": "Inside the Arena Where a 16-Year-Old Became a World Champion",
+      "description": "A look at how a 16-year-old rose from regional qualifiers to a world championship title, and what it means for esports as a recognized sport.",
+      "tags": [
+        "esports",
+        "gaming",
+        "youth-athletes"
+      ],
+      "url": "/20260601/sports/esports/20260601-teen-esports-world-champion/en/"
+    },
+    "20260601-teen-esports-world-champion:vi": {
+      "hash": "3f5846df2078a2795ad4768bfd22ce6f097fe948a8e8ca030159b7dd506ed2b8",
+      "locale": "vi",
+      "category": "sports",
+      "subcategory": "esports",
+      "date": "20260601",
+      "date_iso": "2026-06-01T01:00:00.000Z",
+      "slug": "20260601-teen-esports-world-champion",
+      "title": "Bên trong đấu trường nơi một thiếu niên 16 tuổi trở thành nhà vô địch thế giới",
+      "description": "Hành trình của một vận động viên esports 16 tuổi từ vòng loại khu vực đến chức vô địch thế giới, và ý nghĩa của nó đối với esports.",
+      "tags": [
+        "esports",
+        "gaming",
+        "youth-athletes"
+      ],
+      "url": "/20260601/sports/esports/20260601-teen-esports-world-champion/vi/"
+    },
+    "20260601-olympic-swimmer-early-training:en": {
+      "hash": "7da7fe5e02ab43434b7653ad47ff07be869a4c928acffce68f340572cdfcbc61",
+      "locale": "en",
+      "category": "sports",
+      "subcategory": "olympics",
+      "date": "20260601",
+      "date_iso": "2026-06-01T02:00:00.000Z",
+      "slug": "20260601-olympic-swimmer-early-training",
+      "title": "The Swimmer Who Trains at 4 A.M. and Why It Might Be Worth It",
+      "description": "An inside look at the pre-dawn training routines of Olympic-hopeful swimmers, and the science behind why early mornings became standard practice.",
+      "tags": [
+        "olympics",
+        "swimming",
+        "training"
+      ],
+      "url": "/20260601/sports/olympics/20260601-olympic-swimmer-early-training/en/"
+    },
+    "20260601-olympic-swimmer-early-training:vi": {
+      "hash": "c835f90b1dc6669b78543bf002c7549bead335e155d3c21923d383406bb761b2",
+      "locale": "vi",
+      "category": "sports",
+      "subcategory": "olympics",
+      "date": "20260601",
+      "date_iso": "2026-06-01T02:00:00.000Z",
+      "slug": "20260601-olympic-swimmer-early-training",
+      "title": "Vận động viên bơi lội tập luyện từ 4 giờ sáng và lý do nó đáng giá",
+      "description": "Góc nhìn về lịch tập luyện trước rạng đông của các vận động viên bơi hướng tới Olympic, và khoa học phía sau thói quen dậy sớm này.",
+      "tags": [
+        "olympics",
+        "swimming",
+        "training"
+      ],
+      "url": "/20260601/sports/olympics/20260601-olympic-swimmer-early-training/vi/"
+    },
+    "20260601-indie-film-box-office-surprise:en": {
+      "hash": "da78ab16d4ca98bee20881c097803122b9bb9e9651d6fbb90027a1f803e64393",
+      "locale": "en",
+      "category": "entertainment",
+      "subcategory": "film",
+      "date": "20260601",
+      "date_iso": "2026-06-01T03:00:00.000Z",
+      "slug": "20260601-indie-film-box-office-surprise",
+      "title": "The Quiet Indie Film That Outsold Three Blockbusters Last Weekend",
+      "description": "A small character drama with no marketing budget and a cast of unknowns just had the best per-screen average of the year, beating three major studio releases.",
+      "tags": [
+        "film",
+        "box-office",
+        "independent-cinema"
+      ],
+      "url": "/20260601/entertainment/film/20260601-indie-film-box-office-surprise/en/"
+    },
+    "20260601-indie-film-box-office-surprise:vi": {
+      "hash": "cba3f8c32c89a5ba27d504e36e58b7076c1feb72e7c016573c5e8524895f711c",
+      "locale": "vi",
+      "category": "entertainment",
+      "subcategory": "film",
+      "date": "20260601",
+      "date_iso": "2026-06-01T03:00:00.000Z",
+      "slug": "20260601-indie-film-box-office-surprise",
+      "title": "Bộ phim độc lập thầm lặng vượt mặt ba bom tấn vào cuối tuần qua",
+      "description": "Một bộ phim chính kịch nhỏ không có kinh phí quảng cáo và dàn diễn viên vô danh vừa đạt mức doanh thu trung bình mỗi rạp cao nhất trong năm, vượt qua ba phim của các hãng lớn.",
+      "tags": [
+        "film",
+        "box-office",
+        "independent-cinema"
+      ],
+      "url": "/20260601/entertainment/film/20260601-indie-film-box-office-surprise/vi/"
+    },
+    "20260601-album-recorded-in-subway-station:en": {
+      "hash": "1a012a5fc415926fe338ffa2e9a7dbddb1d5066b5eb17ed82ac6e9585d60ea63",
+      "locale": "en",
+      "category": "entertainment",
+      "subcategory": "music",
+      "date": "20260601",
+      "date_iso": "2026-06-01T04:00:00.000Z",
+      "slug": "20260601-album-recorded-in-subway-station",
+      "title": "The Band That Wrote an Entire Album in a Decommissioned Subway Station",
+      "description": "A band spent six weeks living and recording inside a decommissioned subway station, and the album's unusual acoustics are already drawing comparisons to classic live recordings.",
+      "tags": [
+        "music",
+        "album-release",
+        "recording"
+      ],
+      "url": "/20260601/entertainment/music/20260601-album-recorded-in-subway-station/en/"
+    },
+    "20260601-album-recorded-in-subway-station:vi": {
+      "hash": "0b51cdb5155aa5ef4ebf848a02e773b8e47e99e24fd7fbde76ecdd5d225e2f89",
+      "locale": "vi",
+      "category": "entertainment",
+      "subcategory": "music",
+      "date": "20260601",
+      "date_iso": "2026-06-01T04:00:00.000Z",
+      "slug": "20260601-album-recorded-in-subway-station",
+      "title": "Ban nhạc viết cả một album trong một trạm tàu điện ngầm đã ngừng hoạt động",
+      "description": "Một ban nhạc đã sống và ghi âm trong sáu tuần bên trong một trạm tàu điện ngầm bỏ hoang, và âm thanh độc đáo của album đang được so sánh với các bản ghi âm trực tiếp kinh điển.",
+      "tags": [
+        "music",
+        "album-release",
+        "recording"
+      ],
+      "url": "/20260601/entertainment/music/20260601-album-recorded-in-subway-station/vi/"
+    },
+    "20260601-ai-translation-endangered-language:en": {
+      "hash": "d50cba274a584492329691dc6314f075c980de807025a657aaf78a14d7350d09",
+      "locale": "en",
+      "category": "technology",
+      "subcategory": "ai",
+      "date": "20260601",
+      "date_iso": "2026-06-01T05:00:00.000Z",
+      "slug": "20260601-ai-translation-endangered-language",
+      "title": "The Translation App That Learned a Dying Language From Forty Hours of Tape",
+      "description": "Researchers trained a translation model on forty hours of archival recordings of a language with fewer than a dozen fluent speakers left, and the results are reshaping how linguists think about language preservation.",
+      "tags": [
+        "artificial-intelligence",
+        "language-preservation",
+        "machine-learning"
+      ],
+      "url": "/20260601/technology/ai/20260601-ai-translation-endangered-language/en/"
+    },
+    "20260601-ai-translation-endangered-language:vi": {
+      "hash": "920a582f5e3d0207435490cb44eb8274763e9c57dc0ee5bffbda66a031c32c03",
+      "locale": "vi",
+      "category": "technology",
+      "subcategory": "ai",
+      "date": "20260601",
+      "date_iso": "2026-06-01T05:00:00.000Z",
+      "slug": "20260601-ai-translation-endangered-language",
+      "title": "Ứng dụng dịch thuật học một ngôn ngữ sắp biến mất từ bốn mươi giờ băng ghi âm",
+      "description": "Các nhà nghiên cứu đã huấn luyện một mô hình dịch thuật từ bốn mươi giờ ghi âm lưu trữ của một ngôn ngữ chỉ còn chưa đến chục người nói thành thạo, và kết quả đang thay đổi cách các nhà ngôn ngữ học nghĩ về việc bảo tồn ngôn ngữ.",
+      "tags": [
+        "artificial-intelligence",
+        "language-preservation",
+        "machine-learning"
+      ],
+      "url": "/20260601/technology/ai/20260601-ai-translation-endangered-language/vi/"
+    }
+  }
+}

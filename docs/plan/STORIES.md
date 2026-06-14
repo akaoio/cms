@@ -1,6 +1,6 @@
 # Epics & Stories — Akao CMS
 
-**Status:** ✅ Updated — 2026-06-02 (boss revise round 2: file structure, factory folders, JSON meta, perf)
+**Status:** ✅ Updated — 2026-06-08 (meta.json → meta.yaml; optional frontmatter in locale.md; URL format + subcategory locked)
 **Full document:** `_bmad-output/planning-artifacts/epics.md`
 
 ---
@@ -27,10 +27,10 @@
 
 **Changes from boss revise round 2 (2026-06-02):**
 
-- Story 1.0: REWRITTEN — factory-model folder structure (`draft/`, `published/`), fixtures use new layout
+- Story 1.0: REWRITTEN — factory-model folder structure (`draft/`, `staged/`), fixtures use new layout
 - Story 1.1: REWRITTEN — was "Inline YAML Parser", now "Meta Reader + Validator" (`src/cms/meta.js`)
 - Story 1.2: REWRITTEN — was "Frontmatter Parser", now "Markdown Body Loader" (no fence splitting)
-- Story 1.4: Updated ingest path to `content/posts/published/**` only; `draft/` exclusion is structural
+- Story 1.4: Updated ingest path to `content/posts/staged/**` only; `draft/` exclusion is structural
 - Story 3.1: TBT < 200ms added to Lighthouse gate
 - Story 3.2: Perf verifier added — assert no undeferred `<script>` in emitted HTML
 
@@ -56,7 +56,7 @@
 
   ```text
   content/posts/draft/
-  content/posts/published/
+  content/posts/staged/
   content/posts/archived/
   content/pages/
   ```
@@ -65,23 +65,24 @@
 
   ```text
   src/cms/__test__/fixtures/
-  ├── published/2026/06/01/00/01/
-  │   ├── en.md          ← valid article body (no frontmatter fence)
-  │   └── meta.json      ← all required fields present
+  ├── staged/2026/06/01/00/01/
+  │   ├── en.md          ← valid article body (optional frontmatter at top)
+  │   ├── vi.md          ← locale override via frontmatter (title, lang, description)
+  │   └── meta.yaml      ← all required fields present (category + subcategory)
   ├── draft/2026/06/01/00/02/
   │   ├── en.md
-  │   └── meta.json      ← valid but in draft/ → must NOT appear in build
-  ├── published/2026/06/01/00/03/
+  │   └── meta.yaml      ← valid but in draft/ → must NOT appear in build
+  ├── staged/2026/06/01/00/03/
   │   ├── en.md
-  │   └── meta.json      ← missing "title" → should fail validation
-  ├── published/2026/06/01/00/04/
-  │   └── meta.json      ← { "title": "Barça: el partido", ... } — colon in title
-  ├── published/2026/06/01/00/05/
-  │   └── meta.json      ← category with Unicode characters
-  ├── published/2026/06/01/00/06/
-  │   └── en.md          ← < 300 words (thin content)
-  └── published/2026/06/01/00/07/
-      └── meta.json      ← publish_at = 2099-01-01 (future date → skip silently)
+  │   └── meta.yaml      ← missing "title" → should fail validation
+  ├── staged/2026/06/01/00/04/
+  │   └── meta.yaml      ← title: "Final Whistle: How a Last-Minute Penalty Decided the Derby" — colon in title
+  ├── staged/2026/06/01/00/05/
+  │   └── meta.yaml      ← category với Unicode characters
+  ├── staged/2026/06/01/00/06/
+  │   └── en.md          ← < 600 words (thin content)
+  └── staged/2026/06/01/00/07/
+      └── meta.yaml      ← publish_at = 2099-01-01 (future date → skip silently)
   ```
 
 - `npm run build:cms` registered in package.json (no-op stub OK)
@@ -91,12 +92,13 @@
 ### Story 1.1 — Meta Reader + Validator
 
 **File:** `src/cms/meta.js`  
-**Why first:** Replaces both `yaml.js` (dropped) and `frontmatter.js` (dropped). All article metadata now lives in `meta.json` — read via `FS.load()` which auto-parses `.json` files natively. No custom parser needed.
+**Why first:** Human-written metadata lives in `meta.yaml`; locale-specific overrides live in optional frontmatter of `<locale>.md`. `readMeta(dir, locale?)` merges both — frontmatter wins.
 
 **DoD:**
 
-- `readMeta(articleDir)` → calls `FS.load([...articleDir, 'meta.json'])` → returns parsed object
-- Validates required fields: `title`, `date`, `category` — throws `{ code: 'MISSING_FIELD', field, dir }` on missing
+- `readMeta(articleDir)` → reads `meta.yaml` via `YAML.js` → returns parsed object
+- `readMeta(articleDir, locale)` → additionally reads `<locale>.md` frontmatter → merges over meta.yaml (frontmatter fields win)
+- Validates required fields: `title`, `date`, `category`, `subcategory` — throws `{ code: 'MISSING_FIELD', field, dir }` on missing
 - Optional fields passed through: `slug`, `tags`, `description`, `image`, `lang`, `fb_caption`, `publish_at`, `updated_at`
 - **No `draft` or `status` field** — status is determined by folder position, not field value
 - Test suite `src/cms/__test__/meta.test.js` using all 7 fixtures from Story 1.0 — passes with zero dependencies
@@ -107,12 +109,13 @@
 ### Story 1.2 — Markdown Body Loader
 
 **File:** `src/cms/markdown.js`  
-**Note:** `frontmatter.js` is eliminated — no `---` fence to split. Body `.md` files contain article content only.
+**Note:** `frontmatter.js` is replaced by `extractFrontmatter()` built into `markdown.js`. Body `.md` files MAY have an optional `---..---` YAML block at the top (locale overrides); `parseMarkdown()` strips it and converts only the body.
 
 **DoD:**
 
-- `parseMarkdown(bodyText)` → returns HTML string
-- Body files have NO frontmatter fence — first character of `.md` is article content
+- `extractFrontmatter(text)` → `{ meta: object|null, body: string }` — parses optional YAML block
+- `parseMarkdown(input)` → calls `extractFrontmatter` first, then converts body to HTML string
+- Files without frontmatter work identically — first non-fence character is article content
 - Supports: h1–h6, bold, italic, inline code, code block, link, image, unordered list, ordered list, blockquote, `---` rule
 - ~150–180 lines, zero external imports
 - Test suite covers all element types using fixture body files from Story 1.0
@@ -138,7 +141,7 @@
 **DoD:**
 
 - `npm run build:cms` runs full pipeline
-- `ingest.js` recurses `content/posts/published/**` only — `draft/` and `archived/` folders never touched
+- `ingest.js` recurses `content/posts/staged/**` only — `draft/` and `archived/` folders never touched
 - One bad article folder → logged to `build/errors.log` as `{ ts, dir, error }`, build continues
 - Build exits code 0, prints "N articles, M errors, K warnings"
 - **Quality gate (automation without human):**
@@ -187,14 +190,14 @@
 - `routes.json` contains **4 pattern entries** only — never grows with article count:
 
   ```json
-  { "pattern": "/{locale}/{category}/{slug}/", "component": "cms-page" }
-  { "pattern": "/{locale}/{category}/",        "component": "cms-list" }
-  { "pattern": "/{locale}/tag/{tag}/",         "component": "cms-list" }
-  { "pattern": "/{locale}/{page}/",            "component": "cms-page" }
+  { "pattern": "/{date}/{cat1}/{cat2}/{slug}/{locale}/", "component": "cms-page" }
+  { "pattern": "/{cat1}/{cat2}/",                        "component": "cms-list" }
+  { "pattern": "/tag/{tag}/",                            "component": "cms-list" }
+  { "pattern": "/{page}/",                               "component": "cms-page" }
   ```
 
 - `routes.json` file size stays constant regardless of article count
-- SPA Router.js resolves `/en/sports/my-article/` to `cms-page` via pattern match
+- SPA Router.js resolves `/20260601/sports/football/my-article/vi/` to `cms-page` via pattern match
 - Build runs 1,000 times → `routes.json` unchanged (idempotent)
 - **NEVER injects per-article paths** — this story does NOT add individual article entries
 
@@ -245,7 +248,7 @@
   ```text
   build/index/{locale}/{category}/page-1.json   ← 20 articles each (~4KB)
   build/index/{locale}/{category}/page-2.json
-  build/index/{locale}/{category}/meta.json     ← { total, pages, category, locale }
+  build/index/{locale}/{category}/meta.yaml     ← { total, pages, category, locale }
   ```
 
 - `<cms-list>` fetches page-N.json based on URL query param `?page=N`
@@ -260,7 +263,7 @@
 
 ### Story 2.1 — Article, Category, Tag, Static Page Routes
 
-**Files:** `src/UI/routes/article/[locale]/[category]/[slug]/`, `src/UI/routes/category/[category]/`, `src/UI/routes/tag/[tag]/`, `src/UI/routes/page/[slug]/`
+**Files:** `src/UI/routes/{date}/{cat1}/{cat2}/{slug}/{locale}/`, `src/UI/routes/{date}/{cat1}/{cat2}/`, `src/UI/routes/{date}/{cat1}/`
 
 **DoD:**
 
@@ -291,7 +294,7 @@
 **DoD:**
 
 - Renders into `this` (light DOM) — `attachShadow` NOT present in file
-- Loads article HTML from `build/{locale}/{category}/{slug}/` via DB.js
+- Loads article HTML from `build/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/` via DB.js
 - Three ad slot containers present: `id="ad-top"`, `id="ad-mid"`, `id="ad-bottom"`
 - Re-renders on route change without full page reload
 - `disconnectedCallback` cancels subscriptions + pending fetches
@@ -330,7 +333,7 @@
 
 **DoD:**
 
-- Test: write `meta.json + en.md` to `published/` → `build:cms` → HTML exists → OG tags present → hash exists → sitemap has URL
+- Test: write `meta.yaml + en.md` to `staged/` → `build:cms` → HTML exists → OG tags present → hash exists → sitemap has URL
 - `build/errors.log` empty for valid content
 - Lighthouse score ≥ 85, LCP < 2.5s, CLS < 0.1, **TBT < 200ms**
 

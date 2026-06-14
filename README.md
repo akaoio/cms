@@ -180,9 +180,9 @@ Full specifications live in [`docs/`](docs/):
 | Document                                                               | Purpose                                                          |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | [`docs/PRD.md`](docs/PRD.md)                                           | Product requirements — FRs, NFRs, user journeys, success metrics |
-| [`docs/design/02_ARCHITECTURE.md`](docs/design/02_ARCHITECTURE.md)     | Technical architecture — ADRs, file structure, patterns          |
-| [`docs/design/04_SYSTEM_FLOW.md`](docs/design/04_SYSTEM_FLOW.md)       | Business model, revenue pipeline                                 |
-| [`docs/design/05_SCALE_AND_RISK.md`](docs/design/05_SCALE_AND_RISK.md) | Scale projections and risk analysis                              |
+| [`docs/design/01_ARCHITECTURE.md`](docs/design/01_ARCHITECTURE.md)     | Technical architecture — ADRs, file structure, patterns          |
+| [`docs/design/02_SYSTEM_FLOW.md`](docs/design/02_SYSTEM_FLOW.md)       | Business model, revenue pipeline                                 |
+| [`docs/design/03_SCALE_AND_RISK.md`](docs/design/03_SCALE_AND_RISK.md) | Scale projections and risk analysis                              |
 | [`docs/plan/SCOPE.md`](docs/plan/SCOPE.md)                             | MVP scope — what's in, what's out, all confirmed decisions       |
 | [`docs/plan/STORIES.md`](docs/plan/STORIES.md)                         | 19 user stories across 3 epics with acceptance criteria          |
 

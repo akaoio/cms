@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>Akao CMS</title>
+    <link>http://localhost:3000</link>
+    <description>A zero-dependency static site generator</description>
+    <language>en</language>
+    <lastBuildDate>Sun, 14 Jun 2026 19:41:07 GMT</lastBuildDate>
+    <item>
+      <title>The Translation App That Learned a Dying Language From Forty Hours of Tape</title>
+      <link>http://localhost:3000/20260601/technology/ai/20260601-ai-translation-endangered-language/en/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/technology/ai/20260601-ai-translation-endangered-language/en/</guid>
+      <pubDate>Mon, 01 Jun 2026 05:00:00 GMT</pubDate>
+      <description>Researchers trained a translation model on forty hours of archival recordings of a language with fewer than a dozen fluent speakers left, and the results are reshaping how linguists think about language preservation.</description>
+      <category>technology</category>
+    </item>
+    <item>
+      <title>Ứng dụng dịch thuật học một ngôn ngữ sắp biến mất từ bốn mươi giờ băng ghi âm</title>
+      <link>http://localhost:3000/20260601/technology/ai/20260601-ai-translation-endangered-language/vi/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/technology/ai/20260601-ai-translation-endangered-language/vi/</guid>
+      <pubDate>Mon, 01 Jun 2026 05:00:00 GMT</pubDate>
+      <description>Các nhà nghiên cứu đã huấn luyện một mô hình dịch thuật từ bốn mươi giờ ghi âm lưu trữ của một ngôn ngữ chỉ còn chưa đến chục người nói thành thạo, và kết quả đang thay đổi cách các nhà ngôn ngữ học nghĩ về việc bảo tồn ngôn ngữ.</description>
+      <category>technology</category>
+    </item>
+    <item>
+      <title>The Band That Wrote an Entire Album in a Decommissioned Subway Station</title>
+      <link>http://localhost:3000/20260601/entertainment/music/20260601-album-recorded-in-subway-station/en/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/entertainment/music/20260601-album-recorded-in-subway-station/en/</guid>
+      <pubDate>Mon, 01 Jun 2026 04:00:00 GMT</pubDate>
+      <description>A band spent six weeks living and recording inside a decommissioned subway station, and the album's unusual acoustics are already drawing comparisons to classic live recordings.</description>
+      <category>entertainment</category>
+    </item>
+    <item>
+      <title>Ban nhạc viết cả một album trong một trạm tàu điện ngầm đã ngừng hoạt động</title>
+      <link>http://localhost:3000/20260601/entertainment/music/20260601-album-recorded-in-subway-station/vi/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/entertainment/music/20260601-album-recorded-in-subway-station/vi/</guid>
+      <pubDate>Mon, 01 Jun 2026 04:00:00 GMT</pubDate>
+      <description>Một ban nhạc đã sống và ghi âm trong sáu tuần bên trong một trạm tàu điện ngầm bỏ hoang, và âm thanh độc đáo của album đang được so sánh với các bản ghi âm trực tiếp kinh điển.</description>
+      <category>entertainment</category>
+    </item>
+    <item>
+      <title>The Quiet Indie Film That Outsold Three Blockbusters Last Weekend</title>
+      <link>http://localhost:3000/20260601/entertainment/film/20260601-indie-film-box-office-surprise/en/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/entertainment/film/20260601-indie-film-box-office-surprise/en/</guid>
+      <pubDate>Mon, 01 Jun 2026 03:00:00 GMT</pubDate>
+      <description>A small character drama with no marketing budget and a cast of unknowns just had the best per-screen average of the year, beating three major studio releases.</description>
+      <category>entertainment</category>
+    </item>
+    <item>
+      <title>Bộ phim độc lập thầm lặng vượt mặt ba bom tấn vào cuối tuần qua</title>
+      <link>http://localhost:3000/20260601/entertainment/film/20260601-indie-film-box-office-surprise/vi/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/entertainment/film/20260601-indie-film-box-office-surprise/vi/</guid>
+      <pubDate>Mon, 01 Jun 2026 03:00:00 GMT</pubDate>
+      <description>Một bộ phim chính kịch nhỏ không có kinh phí quảng cáo và dàn diễn viên vô danh vừa đạt mức doanh thu trung bình mỗi rạp cao nhất trong năm, vượt qua ba phim của các hãng lớn.</description>
+      <category>entertainment</category>
+    </item>
+    <item>
+      <title>The Swimmer Who Trains at 4 A.M. and Why It Might Be Worth It</title>
+      <link>http://localhost:3000/20260601/sports/olympics/20260601-olympic-swimmer-early-training/en/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/sports/olympics/20260601-olympic-swimmer-early-training/en/</guid>
+      <pubDate>Mon, 01 Jun 2026 02:00:00 GMT</pubDate>
+      <description>An inside look at the pre-dawn training routines of Olympic-hopeful swimmers, and the science behind why early mornings became standard practice.</description>
+      <category>sports</category>
+    </item>
+    <item>
+      <title>Vận động viên bơi lội tập luyện từ 4 giờ sáng và lý do nó đáng giá</title>
+      <link>http://localhost:3000/20260601/sports/olympics/20260601-olympic-swimmer-early-training/vi/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/sports/olympics/20260601-olympic-swimmer-early-training/vi/</guid>
+      <pubDate>Mon, 01 Jun 2026 02:00:00 GMT</pubDate>
+      <description>Góc nhìn về lịch tập luyện trước rạng đông của các vận động viên bơi hướng tới Olympic, và khoa học phía sau thói quen dậy sớm này.</description>
+      <category>sports</category>
+    </item>
+    <item>
+      <title>Inside the Arena Where a 16-Year-Old Became a World Champion</title>
+      <link>http://localhost:3000/20260601/sports/esports/20260601-teen-esports-world-champion/en/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/sports/esports/20260601-teen-esports-world-champion/en/</guid>
+      <pubDate>Mon, 01 Jun 2026 01:00:00 GMT</pubDate>
+      <description>A look at how a 16-year-old rose from regional qualifiers to a world championship title, and what it means for esports as a recognized sport.</description>
+      <category>sports</category>
+    </item>
+    <item>
+      <title>Bên trong đấu trường nơi một thiếu niên 16 tuổi trở thành nhà vô địch thế giới</title>
+      <link>http://localhost:3000/20260601/sports/esports/20260601-teen-esports-world-champion/vi/</link>
+      <guid isPermaLink="true">http://localhost:3000/20260601/sports/esports/20260601-teen-esports-world-champion/vi/</guid>
+      <pubDate>Mon, 01 Jun 2026 01:00:00 GMT</pubDate>
+      <description>Hành trình của một vận động viên esports 16 tuổi từ vòng loại khu vực đến chức vô địch thế giới, và ý nghĩa của nó đối với esports.</description>
+      <category>sports</category>
+    </item>
+  </channel>
+</rss>
