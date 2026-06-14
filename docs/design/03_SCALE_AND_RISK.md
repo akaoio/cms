@@ -82,9 +82,9 @@ Tier 1 (7/7 ✅) và Tier 2 (phần build pipeline) solid. Focus vào phần thi
 
 ### Akao workflow hiện tại: binary
 
-```
-draft: false → publish
-draft: true  → excluded
+```text
+staged/ folder → build reads, outputs to CDN
+draft/  folder → excluded from build
 ```
 
 ### 5 Workflow Gaps
@@ -103,7 +103,7 @@ if (meta.publish_at && new Date(meta.publish_at) > new Date()) continue
 ```
 
 **Gap W2: Không có Content State Machine** — **quan trọng nhất**
-Cần: `draft → scheduled → published → flagged → archived`
+Cần: `draft → scheduled → staged → flagged → archived`
 
 Thiếu `flagged`: quality gate skip file nhưng không có marker → operator không biết file nào bị skip vì sao.
 
@@ -111,11 +111,9 @@ Thiếu `archived`: AI xóa file → URL chết → 404 → Facebook tracking 40
 
 Fix:
 
-```yaml
-status: draft | scheduled | published | flagged | archived
-```
+Move file to appropriate folder: `draft/` → `staged/` → `archived/` (structural, not a field).
 
-`status: archived` → write redirect stub thay vì xóa file.
+`archived/` folder → write redirect stub thay vì xóa file.
 
 **Gap W3: Revision History chưa operational**
 Git trên `content/` = 80% giải pháp nhưng AI không được instructed commit. Hệ quả: không audit được khi Google flag duplicate.

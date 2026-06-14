@@ -7,21 +7,21 @@
 
 ## §1 — Directory Structure (source of truth)
 
-```
+```text
 akao-cms/
 ├── content/
 │   ├── posts/
-│   │   ├── draft/YYYY/MM/DD/XX/YY/  ← AI writes here; never scanned by build (ADR-006)
-│   │   ├── published/YYYY/MM/DD/XX/YY/ ← build reads here only
-│   │   └── archived/YYYY/MM/DD/XX/YY/  ← redirect stubs; URL never 404s
+│   │   ├── draft/YYYY/MM/DD/XX/YY/   ← AI writes here; never scanned by build (ADR-006)
+│   │   ├── staged/YYYY/MM/DD/XX/YY/  ← build reads here only; "staged" = ready for build, not live yet
+│   │   └── archived/YYYY/MM/DD/XX/YY/ ← redirect stubs; URL never 404s
 │   └── pages/YYYY/MM/DD/XX/YY/
 │       ├── en.md
 │       └── meta.yaml
 │
 ├── src/
 │   ├── cms/                          ← kernel: isomorphic, zero env calls (ADR-001)
-│   │   ├── config.js                 ← loads + validates config.json
-│   │   ├── config.json               ← site config (locales, categories, adsense, quality_gate)
+│   │   ├── config.js                 ← loads + validates config.yaml
+│   │   ├── config.yaml               ← site config (locales, categories, adsense, quality_gate)
 │   │   ├── feed.js                   ← emits sitemap.xml, rss.xml, robots.txt
 │   │   ├── index.js                  ← builds manifest.json, drives incremental logic
 │   │   ├── markdown.js               ← Markdown → HTML; strips optional frontmatter fence
@@ -29,14 +29,14 @@ akao-cms/
 │   │   ├── seo.js                    ← generates <meta>, OG, JSON-LD per page
 │   │   └── __test__/
 │   │       └── fixtures/
-│   │           ├── config/           ← JSON config fixtures for config.test.js
+│   │           ├── config/           ← YAML config fixtures for config.test.js
 │   │           ├── draft/            ← draft article fixtures (must NOT appear in build)
-│   │           └── published/        ← published article fixtures
+│   │           └── staged/           ← staged article fixtures (ready-for-build)
 │   │
 │   ├── builder/                      ← build pipeline: Node.js only
 │   │   ├── cms.js                    ← CLI entry point (npm run build:cms)
 │   │   ├── errors.js                 ← appends { ts, file, error } to build/errors.log
-│   │   ├── ingest.js                 ← scans content/posts/published/** only
+│   │   ├── ingest.js                 ← scans content/posts/staged/** only
 │   │   ├── pipeline.js               ← ingest → index → render → routes → feed
 │   │   ├── render.js                 ← assembles HTML per article per locale
 │   │   └── routes-inject.js          ← appends routes to Router manifest
@@ -56,14 +56,13 @@ akao-cms/
 │       ├── components/
 │       │   ├── cms-list/index.js     ← category/tag listing, pagination
 │       │   └── cms-page/index.js     ← renders article HTML, AdSense slots
-└── routes/
-    ├── {date}/{cat1}/{cat2}/{slug}/{locale}/
-    ├── {date}/{cat1}/{cat2}/
-    └── {date}/{cat1}/
-
+│       └── routes/
+│           ├── {date}/{cat1}/{cat2}/{slug}/{locale}/
+│           ├── {date}/{cat1}/{cat2}/
+│           └── {date}/{cat1}/
 │
 └── build/                            ← generated output (not committed to git)
-    ├── {locale}/{category}/{slug}/
+    ├── {date}/{cat1}/{cat2}/{slug}/{locale}/
     │   ├── index.html                ← complete pre-rendered HTML
     │   └── index.hash                ← SHA-256 of HTML
     ├── errors.log
@@ -73,7 +72,7 @@ akao-cms/
     └── sitemap.xml
 ```
 
-> ADR-001 governs the `src/cms/` boundary (enforced by import-graph lint rules, not by directory placement — see ADR-001 rationale). ADR-005 governs `YYYY/MM/DD/XX/YY/` path format. ADR-006 governs `draft/published/archived/` layout.
+> ADR-001 governs the `src/cms/` boundary (enforced by import-graph lint rules, not by directory placement — see ADR-001 rationale). ADR-005 governs `YYYY/MM/DD/XX/YY/` path format. ADR-006 governs `draft/staged/archived/` layout.
 >
 > **Note:** `cms/` and `builder/` live under `src/` alongside `core/` and `UI/` — they are all source code, differing only in runtime target (isomorphic vs. Node-only vs. browser-only), not in architectural importance. This also avoids the `cms` name colliding with the repo name and with itself across the tree (see ADR-001 discussion).
 
@@ -114,11 +113,11 @@ These modules come from the akao codebase and are kept unchanged. All new CMS co
 
 ```
 content/posts/
-  ├── draft/YYYY/MM/DD/XX/YY/         (AI writes drafts here — never scanned by build)
-  │     ├── en.md                     (optional frontmatter + body)
-  │     └── meta.yaml                 (shared metadata: date, category, slug, tags, ...)
-  └── published/YYYY/MM/DD/XX/YY/     (AI moves here to publish — only this tree is built)
-        ├── en.md                     (optional frontmatter: title, description, lang)
+  ├── draft/YYYY/MM/DD/XX/YY/        (AI writes drafts here — never scanned by build)
+  │     ├── en.md                    (optional frontmatter + body)
+  │     └── meta.yaml                (shared metadata: date, category, slug, tags, ...)
+  └── staged/YYYY/MM/DD/XX/YY/       (AI moves here when ready to build — only this tree is built)
+        ├── en.md                    (optional frontmatter: title, description, lang)
         ├── vi.md
         └── meta.yaml
 content/pages/YYYY/MM/DD/XX/YY/
@@ -126,7 +125,7 @@ content/pages/YYYY/MM/DD/XX/YY/
   └── meta.yaml
         │
         ▼
-src/builder/ingest.js       (recursively scans published/** only; draft/ never touched)
+src/builder/ingest.js       (recursively scans staged/** only; draft/ never touched)
         │
         ▼
 src/cms/meta.js         (reads meta.yaml; merges optional locale frontmatter from <locale>.md)
@@ -171,6 +170,7 @@ DB.js validates hash        (background: serves from IndexedDB cache if unchange
 ### ADR-002: Manifest Schema — Versioned Envelope
 
 **Decision:**
+
 ```json
 {
   "v": 1,
@@ -189,9 +189,10 @@ DB.js validates hash        (background: serves from IndexedDB cache if unchange
 
 ### ADR-003: Routing — Hybrid Pre-render + Progressive Enhancement
 
-**Decision:** Build emits complete HTML at `build/{locale}/{category}/{slug}/index.html`. `<cms-page>` and `<cms-list>` are SPA navigation enhancements only — they never own the initial render. AdSense slots are in the static HTML, not injected by JavaScript.
+**Decision:** Build emits complete HTML at `build/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/index.html`. `<cms-page>` and `<cms-list>` are SPA navigation enhancements only — they never own the initial render. AdSense slots are in the static HTML, not injected by JavaScript.
 
 **Why:** Only option that satisfies all three constraints simultaneously:
+
 - AdSense crawler sees fully rendered HTML with ad slots
 - Google indexes real content
 - Works without JavaScript
@@ -203,9 +204,11 @@ DB.js validates hash        (background: serves from IndexedDB cache if unchange
 ### ADR-004: Build Error Reporting
 
 **Decision:** Failed files write to `build/errors.log`:
+
 ```json
 { "ts": "ISO8601", "file": "content/posts/slug.md", "error": "missing title" }
 ```
+
 Build exits code 0 (success), prints error count. AI Agent reads `errors.log` for retry.
 
 **Why:** Per-file fault isolation (NFR-5) must not hide failures from the operator. Build continues but errors are fully visible.
@@ -215,10 +218,12 @@ Build exits code 0 (success), prints error count. AI Agent reads `errors.log` fo
 ### ADR-005: Content Storage — Date + Chunked-ID Hierarchy
 
 **Decision:** All content files live under a date + chunked-ID tree:
+
 ```
 content/posts/{status}/YYYY/MM/DD/XX/YY/<locale>.md
-content/posts/{status}/YYYY/MM/DD/XX/YY/meta.json
+content/posts/{status}/YYYY/MM/DD/XX/YY/meta.yaml
 ```
+
 `XX/YY` is the article ID broken into 2-digit chunks — e.g., ID 1042 → `/10/42/`. Max 100 subfolders per directory level at every depth.
 
 **Why:** At 50–900 articles/day across 18 locales, a flat folder hits VS Code's file watcher OOM and filesystem fan-out limits within weeks. The chunked-ID approach (same as Git's object store) caps fan-out at 100 per directory forever, keeping VS Code usable as the admin interface.
@@ -230,18 +235,20 @@ content/posts/{status}/YYYY/MM/DD/XX/YY/meta.json
 ### ADR-006: Status Management — Factory-Model Folder Structure
 
 **Decision:** Article status is determined by which folder the article lives in:
+
 ```
-content/posts/draft/     ← AI writes here; never scanned by build
-content/posts/published/ ← ingest.js recurses here only
-content/posts/archived/  ← redirect stubs generated; URL never 404s
+content/posts/draft/    ← AI writes here; never scanned by build
+content/posts/staged/   ← ingest.js recurses here only; "staged" = ready for build, not live yet
+content/posts/archived/ ← redirect stubs generated; URL never 404s
 ```
-No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recurse into `published/`**.
 
-**Why:** Folder position is a hard structural guard — no code can accidentally publish a draft by ignoring a flag. With thousands of articles/day, a soft textual guard (`status: draft` in a file) creates unavoidable co-mingling of states in the same tree. The factory-model makes state unambiguous to both tools and humans.
+No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recurse into `staged/`**.
 
-**Moving files on publish:** AI moves the folder from `draft/YYYY/MM/DD/XX/YY/` → `published/YYYY/MM/DD/XX/YY/` (same date = publication date). Use `git mv` to preserve history.
+**Why:** Folder position is a hard structural guard — no code can accidentally build a draft by ignoring a flag. With thousands of articles/day, a soft textual guard (`status: draft` in a file) creates unavoidable co-mingling of states in the same tree. The factory-model makes state unambiguous to both tools and humans. The name `staged/` reflects the Git staging area analogy: content approved for the next build, not yet live on CDN.
 
-**Rejected:** `status: draft` field in frontmatter — soft guard, co-mingled paths, VS Code can't filter by state.
+**Moving files to staged:** AI moves the folder from `draft/YYYY/MM/DD/XX/YY/` → `staged/YYYY/MM/DD/XX/YY/` (same date = intended publication date). Use `git mv` to preserve history.
+
+**Rejected:** `status: draft` field in frontmatter — soft guard, co-mingled paths, VS Code can't filter by state. Also rejected: keeping `published/` as the folder name — misleading because files in that folder are not yet live; "published" describes CDN state, not build-input state.
 
 ---
 
@@ -264,6 +271,7 @@ No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recur
 ### ADR-008: Performance — HTML-First, All JS Deferred
 
 **Decision:** The build pipeline is the performance budget enforcer. Every `index.html` emitted must satisfy:
+
 1. Full article content is in the HTML at parse time — no JS needed to see content.
 2. All `<script>` tags use `defer`, `async`, or `type="module"` — never blocking. (`async` is acceptable for third-party snippets like analytics; `defer` or `type="module"` for all first-party scripts.)
 3. Critical CSS is inlined in `<head>` or loaded with `<link rel="preload">`.
@@ -291,27 +299,27 @@ No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recur
 
 ### `src/cms/` — Zero-environment kernel (isomorphic, no I/O)
 
-| File          | Owns                                                                                                                     | FRs                    |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
-| `meta.js`     | `readMeta(dir, locale?)` — reads `meta.yaml`, merges optional locale frontmatter, validates required fields              | FR-1.1, FR-1.3, FR-1.6 |
-| `markdown.js` | `extractFrontmatter(text)` + `parseMarkdown(text)` — strips optional frontmatter, converts body Markdown → HTML          | FR-1.2                 |
-| `config.js`   | Loads + validates `src/cms/config.yaml`, exposes frozen `{ locales, categories, adsense, site }`                         | FR-2.4, FR-2.5         |
-| `index.js`    | Builds content index, emits `build/manifest.json` (ADR-002), drives hash-diff incremental logic                          | FR-2.2, FR-2.3, FR-2.6 |
-| `seo.js`      | Generates `<meta>`, OG tags, canonical, JSON-LD Article schema per page                                                  | FR-4.1, FR-4.2, FR-4.3 |
-| `feed.js`     | Emits `build/sitemap.xml`, `build/rss.xml`, `build/robots.txt`                                                           | FR-4.4, FR-4.5, FR-4.6 |
+| File          | Owns                                                                                                            | FRs                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `meta.js`     | `readMeta(dir, locale?)` — reads `meta.yaml`, merges optional locale frontmatter, validates required fields     | FR-1.1, FR-1.3, FR-1.6 |
+| `markdown.js` | `extractFrontmatter(text)` + `parseMarkdown(text)` — strips optional frontmatter, converts body Markdown → HTML | FR-1.2                 |
+| `config.js`   | Loads + validates `src/cms/config.yaml`, exposes frozen `{ locales, categories, adsense, site }`                | FR-2.4, FR-2.5         |
+| `index.js`    | Builds content index, emits `build/manifest.json` (ADR-002), drives hash-diff incremental logic                 | FR-2.2, FR-2.3, FR-2.6 |
+| `seo.js`      | Generates `<meta>`, OG tags, canonical, JSON-LD Article schema per page                                         | FR-4.1, FR-4.2, FR-4.3 |
+| `feed.js`     | Emits `build/sitemap.xml`, `build/rss.xml`, `build/robots.txt`                                                  | FR-4.4, FR-4.5, FR-4.6 |
 
 **Added:** `src/core/YAML.js` — minimal flat YAML parser (~60 lines, zero deps) covering the `meta.yaml` subset. `extractFrontmatter()` in `markdown.js` handles optional frontmatter stripping from `.md` files.
 
 ### `src/builder/` — Build orchestration (Node.js only)
 
-| File               | Owns                                                                                                                                                | FRs             |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `cms.js`           | CLI entry point — `npm run build:cms`                                                                                                               | FR-2.1          |
-| `ingest.js`        | Recursively scans `content/posts/published/**` + `content/pages/**` only; `draft/` and `archived/` are never touched; draft exclusion is structural | FR-1.4, FR-1.5  |
-| `pipeline.js`      | Drives full build loop: ingest → index → render → routes → feed                                                                                     | FR-2.1          |
-| `render.js`        | `renderPage(meta, bodyHtml, seoHtml, config, siblings)` → full HTML; output path: `YYYYMMDD/{cat1}/{cat2}/{slug}/{locale}/index.html`               | FR-2.6, FR-3.1  |
-| `routes-inject.js` | Appends article/category/tag/page routes to Router manifest                                                                                         | FR-3.1–3.5      |
-| `errors.js`        | Appends `{ ts, file, error }` to `build/errors.log` — never throws                                                                                  | FR-1.4, ADR-004 |
+| File               | Owns                                                                                                                                             | FRs             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| `cms.js`           | CLI entry point — `npm run build:cms`                                                                                                            | FR-2.1          |
+| `ingest.js`        | Recursively scans `content/posts/staged/**` + `content/pages/**` only; `draft/` and `archived/` are never touched; draft exclusion is structural | FR-1.4, FR-1.5  |
+| `pipeline.js`      | Drives full build loop: ingest → index → render → routes → feed                                                                                  | FR-2.1          |
+| `render.js`        | `renderPage(meta, bodyHtml, seoHtml, config, siblings)` → full HTML; output path: `YYYYMMDD/{cat1}/{cat2}/{slug}/{locale}/index.html`            | FR-2.6, FR-3.1  |
+| `routes-inject.js` | Appends article/category/tag/page routes to Router manifest                                                                                      | FR-3.1–3.5      |
+| `errors.js`        | Appends `{ ts, file, error }` to `build/errors.log` — never throws                                                                               | FR-1.4, ADR-004 |
 
 ### `src/UI/components/` — Web Components (browser, light DOM)
 
@@ -324,15 +332,15 @@ No `status:` or `draft:` field in `meta.yaml`. Build pipeline rule: **only recur
 
 URL format confirmed: `/{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/`
 
-| Path | URL Example |
-| ---- | ----------- |
+| Path                                     | URL Example                               |
+| ---------------------------------------- | ----------------------------------------- |
 | `/{date}/{cat1}/{cat2}/{slug}/{locale}/` | `/20260630/sport/worldcup/my-article/en/` |
-| `/{date}/{cat1}/{cat2}/` | `/20260630/sport/worldcup/` |
-| `/{date}/{cat1}/` | `/20260630/sport/` |
+| `/{date}/{cat1}/{cat2}/`                 | `/20260630/sport/worldcup/`               |
+| `/{date}/{cat1}/`                        | `/20260630/sport/`                        |
 
 **⚠️ Router.js impact:** Router hiện tại parse locale ở segment đầu (`/en/sports/...`). Format mới có locale ở segment cuối — cần cập nhật `Router.js` và `routes.json` patterns.
 
-**⚠️ routes.json — Pattern-based only (boss revise R4)**
+***⚠️ routes.json — Pattern-based only (boss revise R4)***
 
 `routes.json` must use pattern-based entries, NOT per-article injection. Per-article = 50MB at 330K articles → 2–3s SPA parse time.
 
@@ -425,9 +433,9 @@ const locales = config.locales.active
 
 Write fixtures before writing any parser. New structure mirrors the factory-model folder layout:
 
-```
+```text
 src/cms/__test__/fixtures/
-├── published/
+├── staged/
 │   └── 2026/06/01/00/01/
 │       ├── en.md                ← body only (no frontmatter) — title comes from meta.yaml
 │       ├── vi.md                ← optional frontmatter: title/description/lang in Vietnamese
@@ -436,18 +444,22 @@ src/cms/__test__/fixtures/
 │   └── 2026/06/01/00/02/
 │       ├── en.md
 │       └── meta.yaml            ← draft article (must NOT appear in build output)
-├── published/
+├── staged/
 │   └── 2026/06/01/00/03/
 │       ├── en.md
 │       └── meta.yaml            ← missing "title" field → should fail validation
-├── colon-in-title/
-│   └── meta.yaml                ← title: "Barça: el partido" — quoted string in YAML
-├── unicode/
-│   └── meta.yaml                ← category with Unicode characters
-├── thin-content/
-│   └── en.md                    ← < 300 words → THIN_CONTENT error
-└── future-publish/
-    └── meta.yaml                ← publish_at: future date → SKIP silently
+├── staged/
+│   └── 2026/06/01/00/04/
+│       └── meta.yaml            ← title: "Barça: el partido" — quoted string in YAML
+├── staged/
+│   └── 2026/06/01/00/05/
+│       └── meta.yaml            ← category with Unicode characters
+├── staged/
+│   └── 2026/06/01/00/06/
+│       └── en.md                ← < 600 words → THIN_CONTENT error
+└── staged/
+    └── 2026/06/01/00/07/
+        └── meta.yaml            ← publish_at: future date → SKIP silently
 ```
 
 Use plain `assert.deepStrictEqual` — no test framework, zero deps.
@@ -476,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
 ```
 
 **Build-time enforcement** (step 14 of implementation sequence):
+
 ```js
 // src/builder/render.js — after assembling HTML string, before writing:
 if (/<script(?![^>]*\b(defer|async|type=["']module["'])\b)[^>]*>/i.test(html)) {
@@ -489,17 +502,17 @@ if (/<script(?![^>]*\b(defer|async|type=["']module["'])\b)[^>]*>/i.test(html)) {
 
 ## Validation Results
 
-| Requirement           | Coverage                                                      | Status |
-| --------------------- | ------------------------------------------------------------- | ------ |
-| All 21 FRs            | Specific files assigned                                       | ✅      |
-| NFR-1 Zero deps       | All modules inline                                            | ✅      |
-| NFR-2 Build perf      | Incremental build designed; full 330K needs `--locale` flag   | ⚠️ Note |
-| NFR-3 Page perf       | Pre-render + light DOM                                        | ✅      |
-| NFR-4 Isomorphic      | Kernel boundary enforced by import rules                      | ✅      |
-| NFR-5 Fault isolation | errors.log pattern throughout                                 | ✅      |
-| NFR-6 Safety gate     | Validation inside meta.js reader; draft/ folder never scanned | ✅      |
+| Requirement           | Coverage                                                             | Status |
+| --------------------- | -------------------------------------------------------------------- | ------ |
+| All 21 FRs            | Specific files assigned                                              | ✅      |
+| NFR-1 Zero deps       | All modules inline                                                   | ✅      |
+| NFR-2 Build perf      | Incremental build designed; full 330K needs `--locale` flag          | ⚠️ Note |
+| NFR-3 Page perf       | Pre-render + light DOM                                               | ✅      |
+| NFR-4 Isomorphic      | Kernel boundary enforced by import rules                             | ✅      |
+| NFR-5 Fault isolation | errors.log pattern throughout                                        | ✅      |
+| NFR-6 Safety gate     | Validation inside meta.js reader; draft/ and archived/ never scanned | ✅      |
 
-**Overall verdict: READY FOR IMPLEMENTATION**
+***Overall verdict: READY FOR IMPLEMENTATION***
 
 NFR-2 note: incremental build is solid. For cold-start with all 18 locales (330K files), add `--locale` flag + `Threads.js` parallelism. Not a blocker for MVP.
 
@@ -521,12 +534,12 @@ Before any story is started:
 
 ## Implementation Sequence
 
-```
+```text
 1.  git checkout -b feat/cms-refactor
 2.  Delete eCommerce/DeFi code
-3.  Create src/cms/config.yaml + content/posts/draft/ + content/posts/published/ + content/pages/ + test fixtures
+3.  Create src/cms/config.yaml + content/posts/draft/ + content/posts/staged/ + content/pages/ + test fixtures
 4.  Write test fixtures for meta.js and markdown.js (follow Pattern 6 folder layout above)
-5.  Meta reader + validator (src/cms/meta.js) — reads meta.json via FS.load, validates required fields
+5.  Meta reader + validator (src/cms/meta.js) — reads meta.yaml via FS.load, validates required fields
 6.  Markdown → HTML converter (src/cms/markdown.js) — reads body .md, no fence splitting
 7.  build:cms pipeline (src/builder/cms.js + src/builder/pipeline.js)
 8.  Hash generation + errors.log (src/builder/errors.js)
@@ -539,14 +552,14 @@ Before any story is started:
 15. <cms-list> Web Component (light DOM, no attachShadow)
 16. <cms-page> Web Component (light DOM, named AdSense slots)
 17. AdSense slot wiring from src/cms/config.yaml
-18. Integration test: AI writes meta.json + en.md → moves to published/ → build → browser renders → AdSense shows
+18. Integration test: AI writes meta.json + en.md → moves to staged/ → build → browser renders → AdSense shows
 ```
 
 ---
 
 ## Build Output Contract
 
-```
+```text
 build/
 ├── manifest.json          ← { v:1, built:ISO8601, entries:{slug:{hash,locale,category}} }
 ├── index.json             ← article listing for <cms-list>
@@ -564,4 +577,3 @@ build/
 ```
 
 URL ví dụ: `/20260630/sport/worldcup/asdf-qwer-zxcv/en/index.html`
-p/asdf-qwer-zxcv/en/index.html`

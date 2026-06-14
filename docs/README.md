@@ -8,13 +8,13 @@
 
 ## Documents
 
-| File | Purpose | Status |
-| --- | --- | --- |
-| [04_SYSTEM_FLOW.md](./design/04_SYSTEM_FLOW.md) | Business model, revenue pipeline, why Akao vs WordPress | ✅ Final |
-| [PRD.md](./PRD.md) | Product requirements — FRs, NFRs, scope, schemas, locked decisions, DoD | ✅ Final |
-| [02_ARCHITECTURE.md](./design/02_ARCHITECTURE.md) | Technical architecture — ADRs, file structure, patterns, FR→file mapping | ✅ Final |
-| [STORIES.md](./plan/STORIES.md) | 20 stories across 3 epics with acceptance criteria | ✅ Final |
-| [FAN_OUT.md](./implement/FAN_OUT.md) | TDD strategy, module list, architectural constraints, implementation guide | ✅ Final |
+| File                                              | Purpose                                                                    | Status  |
+| ------------------------------------------------- | -------------------------------------------------------------------------- | ------- |
+| [02_SYSTEM_FLOW.md](./design/02_SYSTEM_FLOW.md)   | Business model, revenue pipeline, why Akao vs WordPress                    | ✅ Final |
+| [PRD.md](./PRD.md)                                | Product requirements — FRs, NFRs, scope, schemas, locked decisions, DoD    | ✅ Final |
+| [01_ARCHITECTURE.md](./design/01_ARCHITECTURE.md) | Technical architecture — ADRs, file structure, patterns, FR→file mapping   | ✅ Final |
+| [STORIES.md](./plan/STORIES.md)                   | 20 stories across 3 epics with acceptance criteria                         | ✅ Final |
+| [FAN_OUT.md](./implement/FAN_OUT.md)              | TDD strategy, module list, architectural constraints, implementation guide | ✅ Final |
 
 ---
 

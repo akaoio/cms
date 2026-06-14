@@ -27,10 +27,10 @@
 
 **Changes from boss revise round 2 (2026-06-02):**
 
-- Story 1.0: REWRITTEN — factory-model folder structure (`draft/`, `published/`), fixtures use new layout
+- Story 1.0: REWRITTEN — factory-model folder structure (`draft/`, `staged/`), fixtures use new layout
 - Story 1.1: REWRITTEN — was "Inline YAML Parser", now "Meta Reader + Validator" (`src/cms/meta.js`)
 - Story 1.2: REWRITTEN — was "Frontmatter Parser", now "Markdown Body Loader" (no fence splitting)
-- Story 1.4: Updated ingest path to `content/posts/published/**` only; `draft/` exclusion is structural
+- Story 1.4: Updated ingest path to `content/posts/staged/**` only; `draft/` exclusion is structural
 - Story 3.1: TBT < 200ms added to Lighthouse gate
 - Story 3.2: Perf verifier added — assert no undeferred `<script>` in emitted HTML
 
@@ -56,7 +56,7 @@
 
   ```text
   content/posts/draft/
-  content/posts/published/
+  content/posts/staged/
   content/posts/archived/
   content/pages/
   ```
@@ -65,23 +65,23 @@
 
   ```text
   src/cms/__test__/fixtures/
-  ├── published/2026/06/01/00/01/
+  ├── staged/2026/06/01/00/01/
   │   ├── en.md          ← valid article body (optional frontmatter at top)
   │   ├── vi.md          ← locale override via frontmatter (title, lang, description)
   │   └── meta.yaml      ← all required fields present (category + subcategory)
   ├── draft/2026/06/01/00/02/
   │   ├── en.md
   │   └── meta.yaml      ← valid but in draft/ → must NOT appear in build
-  ├── published/2026/06/01/00/03/
+  ├── staged/2026/06/01/00/03/
   │   ├── en.md
   │   └── meta.yaml      ← missing "title" → should fail validation
-  ├── published/2026/06/01/00/04/
+  ├── staged/2026/06/01/00/04/
   │   └── meta.yaml      ← title: "Barça: el partido" — colon in title
-  ├── published/2026/06/01/00/05/
+  ├── staged/2026/06/01/00/05/
   │   └── meta.yaml      ← category với Unicode characters
-  ├── published/2026/06/01/00/06/
+  ├── staged/2026/06/01/00/06/
   │   └── en.md          ← < 600 words (thin content)
-  └── published/2026/06/01/00/07/
+  └── staged/2026/06/01/00/07/
       └── meta.yaml      ← publish_at = 2099-01-01 (future date → skip silently)
   ```
 
@@ -141,7 +141,7 @@
 **DoD:**
 
 - `npm run build:cms` runs full pipeline
-- `ingest.js` recurses `content/posts/published/**` only — `draft/` and `archived/` folders never touched
+- `ingest.js` recurses `content/posts/staged/**` only — `draft/` and `archived/` folders never touched
 - One bad article folder → logged to `build/errors.log` as `{ ts, dir, error }`, build continues
 - Build exits code 0, prints "N articles, M errors, K warnings"
 - **Quality gate (automation without human):**
@@ -333,7 +333,7 @@
 
 **DoD:**
 
-- Test: write `meta.yaml + en.md` to `published/` → `build:cms` → HTML exists → OG tags present → hash exists → sitemap has URL
+- Test: write `meta.yaml + en.md` to `staged/` → `build:cms` → HTML exists → OG tags present → hash exists → sitemap has URL
 - `build/errors.log` empty for valid content
 - Lighthouse score ≥ 85, LCP < 2.5s, CLS < 0.1, **TBT < 200ms**
 

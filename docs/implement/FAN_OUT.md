@@ -78,8 +78,8 @@ Entry point: `npm run test:cms` → `node --test "src/cms/__test__/**/*.js"` (sc
 
 ### Kernel (`src/cms/`) — isomorphic, zero I/O
 
-| #   | Module                    | File                      | Test file                           | Story |
-| --- | ------------------------- | ------------------------- | ----------------------------------- | ----- |
+| #   | Module                    | File                  | Test file                           | Story |
+| --- | ------------------------- | --------------------- | ----------------------------------- | ----- |
 | 1   | Config loader             | `src/cms/config.js`   | `src/cms/__test__/config.test.js`   | 1.0   |
 | 2   | Meta reader + validator   | `src/cms/meta.js`     | `src/cms/__test__/meta.test.js`     | 1.1   |
 | 3   | Markdown → HTML converter | `src/cms/markdown.js` | `src/cms/__test__/markdown.test.js` | 1.2   |
@@ -89,15 +89,15 @@ Entry point: `npm run test:cms` → `node --test "src/cms/__test__/**/*.js"` (sc
 
 ### Build orchestration (`src/builder/`) — Node.js only
 
-| #   | Module                | File                             | Story |
-| --- | --------------------- | -------------------------------- | ----- |
-| 7   | CLI entry point       | `src/builder/cms.js`             | 1.4   |
-| 8   | Ingest scanner        | `src/builder/ingest.js`          | 1.4   |
-| 9   | Pipeline orchestrator | `src/builder/pipeline.js`        | 1.4   |
-| 10  | HTML renderer         | `src/builder/render.js`          | 1.4   |
-| 11  | Error logger          | `src/builder/errors.js`          | 1.4   |
-| 12  | Hash + manifest       | `src/builder/pipeline.js`        | 1.5   |
-| 13  | Route injector        | `src/builder/routes-inject.js`   | 1.7   |
+| #   | Module                | File                           | Story |
+| --- | --------------------- | ------------------------------ | ----- |
+| 7   | CLI entry point       | `src/builder/cms.js`           | 1.4   |
+| 8   | Ingest scanner        | `src/builder/ingest.js`        | 1.4   |
+| 9   | Pipeline orchestrator | `src/builder/pipeline.js`      | 1.4   |
+| 10  | HTML renderer         | `src/builder/render.js`        | 1.4   |
+| 11  | Error logger          | `src/builder/errors.js`        | 1.4   |
+| 12  | Hash + manifest       | `src/builder/pipeline.js`      | 1.5   |
+| 13  | Route injector        | `src/builder/routes-inject.js` | 1.7   |
 
 ### Web Components (`src/UI/components/`) — browser, light DOM
 
@@ -122,22 +122,22 @@ Fixtures sống tại `src/cms/__test__/fixtures/` và mirror cấu trúc produc
 
 ```text
 src/cms/__test__/fixtures/
-├── published/2026/06/01/00/01/   ← valid, ≥ 600 words
+├── staged/2026/06/01/00/01/      ← valid, ≥ 600 words
 │   ├── en.md
 │   ├── vi.md                     ← locale override via frontmatter
 │   └── meta.yaml
 ├── draft/2026/06/01/00/02/       ← valid nhưng trong draft/ → không được build
 │   ├── en.md
 │   └── meta.yaml
-├── published/2026/06/01/00/03/   ← thiếu field "title" → MISSING_FIELD error
+├── staged/2026/06/01/00/03/      ← thiếu field "title" → MISSING_FIELD error
 │   └── meta.yaml
-├── published/2026/06/01/00/04/   ← title có dấu hai chấm "Barça: el partido"
+├── staged/2026/06/01/00/04/      ← title có dấu hai chấm "Barça: el partido"
 │   └── meta.yaml
-├── published/2026/06/01/00/05/   ← category có Unicode
+├── staged/2026/06/01/00/05/      ← category có Unicode
 │   └── meta.yaml
-├── published/2026/06/01/00/06/   ← < 600 words → THIN_CONTENT error
+├── staged/2026/06/01/00/06/      ← < 600 words → THIN_CONTENT error
 │   └── en.md
-└── published/2026/06/01/00/07/   ← publish_at = 2099-01-01 → SKIP silently
+└── staged/2026/06/01/00/07/      ← publish_at = 2099-01-01 → SKIP silently
     └── meta.yaml
 ```
 

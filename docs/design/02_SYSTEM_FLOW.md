@@ -56,19 +56,24 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
 1. AI Agent receives topic/keyword or reads RSS feed
 2. AI generates article content (title, body, meta description, image URL)
 3. AI writes:
-   - content/posts/published/YYYY/MM/DD/XX/YY/<locale>.md  ← body only, no frontmatter
-   - content/posts/published/YYYY/MM/DD/XX/YY/meta.yaml    ← metadata (title, slug, date, category, ...)
-4. AI runs: npm run build:cms
+   - content/posts/draft/YYYY/MM/DD/XX/YY/<locale>.md  ← body only, no frontmatter
+   - content/posts/draft/YYYY/MM/DD/XX/YY/meta.yaml    ← metadata (title, slug, date, category, ...)
+4. Review (category + policy check, GOALS #3) → git mv draft/ → staged/ (same date, ADR-006)
+5. AI runs: npm run build:cms
    → read meta.yaml + Markdown body (with optional frontmatter parsing)
    → generate HTML + .hash files
    → update build/manifest.json (incremental diff)
    → update sitemap.xml + rss.xml
    → write build/errors.log (any failed files)
-5. Static HTML live at /{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/
-6. AI calls Social MCP: post(url, teaser_text) → 10+ FB pages
-7. Facebook distributes organically
-8. User clicks → CMS page → AdSense loads → impression recorded → $$$
+6. Static HTML live at /{YYYYMMDD}/{cat1}/{cat2}/{slug}/{locale}/
+7. AI calls Social MCP: post(url, teaser_text) → 10+ FB pages
+8. Facebook distributes organically
+9. User clicks → CMS page → AdSense loads → impression recorded → $$$
 ```
+
+> Step 4 (review + `git mv`) áp dụng cho cả hai nguồn content: AI Agent viết trực tiếp, hoặc Adapter dịch từ Reporter output (xem [04_PIPELINE_BOUNDARIES.md](04_PIPELINE_BOUNDARIES.md) và [05_MAP.md](05_MAP.md) Graph 4). Không có đường tắt thẳng vào `staged/`.
+>
+> `GOALS #3` = [00_GOALS.md § Layer 1](00_GOALS.md#layer-1--adsense-fires-điều-kiện-cứng), item 3 — "Content pass AdSense policy".
 
 ---
 
@@ -82,9 +87,9 @@ Describes the role of Akao CMS in the automated content + AdSense revenue system
 | Clean URL + canonical                       | Correct SEO indexing                               | ❗ Critical |
 | Sitemap.xml                                 | Google crawls faster                               | ❗ Critical |
 | RSS feed                                    | AI Agent uses as content source                    | ❗ Critical |
-| Meta title/description                      | Organic Google traffic                             | 🔥 High     |
-| Incremental build                           | Scale to 330K+ pages without slowdown              | 🔥 High     |
-| YAML/Frontmatter support                    | Easier for AI/Writers to manage metadata            | ✅ New      |
+| Meta title/description                      | Organic Google traffic                             | 🔥High      |
+| Incremental build                           | Scale to 330K+ pages without slowdown              | 🔥High      |
+| YAML/Frontmatter support                    | Easier for AI/Writers to manage metadata           | ✅ Done     |
 
 ---
 

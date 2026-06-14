@@ -60,7 +60,7 @@
 
 - [x] **B2 — Fixtures cơ bản**
   Story: 1.0 · Vị trí: `src/cms/__test__/fixtures/`
-  Đã tạo 7 fixtures đúng layout STORIES.md/FAN_OUT.md: `published/.../01` (happy path, ~690 từ, đủ mọi optional field + mọi markdown element type cho B5 tái dùng), `draft/.../02` (loại trừ), `published/.../03` (thiếu `title` → MISSING_FIELD), `published/.../04` (title `"Barça: el partido"`), `published/.../05` (category Unicode `công-nghệ`), `published/.../06` (thin content ~98 từ, không kèm `meta.yaml` theo đúng diagram), `published/.../07` (`publish_at: 2099-01-01` → skip)
+  Đã tạo 7 fixtures đúng layout STORIES.md/FAN_OUT.md: `staged/.../01` (happy path, ~690 từ, đủ mọi optional field + mọi markdown element type cho B5 tái dùng), `draft/.../02` (loại trừ), `staged/.../03` (thiếu `title` → MISSING_FIELD), `staged/.../04` (title `"Barça: el partido"`), `staged/.../05` (category Unicode `công-nghệ`), `staged/.../06` (thin content ~98 từ, không kèm `meta.yaml` theo đúng diagram), `staged/.../07` (`publish_at: 2099-01-01` → skip)
 
 - [x] **B3 — Meta reader test**
   Story: 1.1 · File: `src/cms/__test__/meta.test.js`
@@ -86,7 +86,7 @@
 
 - [ ] **C1 — Ingest scanner test**
   Story: 1.4 · Module: `ingest.js`
-  Việc cần làm: test recurse `content/posts/published/**` — đảm bảo `draft/` và `archived/` không bị chạm tới
+  Việc cần làm: test recurse `content/posts/staged/**` — đảm bảo `draft/` và `archived/` không bị chạm tới
 
 - [ ] **C2 — Quality gate test**
   Story: 1.4 · Module: `pipeline.js` (gate logic)
@@ -162,7 +162,7 @@
 
 - [ ] **E3 — Integration test**
   Story: 3.1 · File: `src/cms/__test__/integration.js`
-  Việc cần làm: test end-to-end — ghi `meta.yaml + en.md` vào `published/` → chạy `build:cms` → assert HTML tồn tại, OG tags đúng, hash tồn tại, sitemap có URL, `errors.log` rỗng với content hợp lệ
+  Việc cần làm: test end-to-end — ghi `meta.yaml + en.md` vào `staged/` → chạy `build:cms` → assert HTML tồn tại, OG tags đúng, hash tồn tại, sitemap có URL, `errors.log` rỗng với content hợp lệ
 
 - [ ] **E4 — Compliance verifier update**
   Story: 3.2 · File: `akao-skill/scripts/verify.js`
